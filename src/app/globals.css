@@ -1,0 +1,144 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===== VEYRA Design System — Light First ===== */
+:root {
+  --font-inter: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  /* Backgrounds */
+  --background: 255 255 255;
+  --foreground: 15 23 42;
+
+  /* Surfaces */
+  --card: 255 255 255;
+  --card-foreground: 15 23 42;
+  --popover: 255 255 255;
+  --popover-foreground: 15 23 42;
+  --secondary: 245 247 250;
+  --secondary-foreground: 15 23 42;
+  --muted: 245 247 250;
+  --muted-foreground: 90 100 116;
+
+  /* Borders & Inputs */
+  --border: 226 232 240;
+  --input: 226 232 240;
+  --ring: 67 56 202;
+
+  /* Brand Accents */
+  --primary: 67 56 202;
+  --primary-foreground: 255 255 255;
+  --accent: 234 232 255;
+  --accent-foreground: 67 56 202;
+
+  /* Semantic */
+  --destructive: 239 68 68;
+  --destructive-foreground: 255 255 255;
+  --success: 16 185 129;
+  --success-foreground: 255 255 255;
+  --warning: 245 158 11;
+  --warning-foreground: 255 255 255;
+
+  /* VEYRA Brand Colors */
+  --veyra-navy: 15 23 42;
+  --veyra-indigo: 67 56 202;
+  --veyra-blue: 59 130 246;
+  --veyra-violet: 124 58 237;
+  --veyra-indigo-soft: 238 236 255;
+  --veyra-violet-soft: 245 240 255;
+
+  /* Radius */
+  --radius: 0.875rem;
+}
+
+.dark {
+  --background: 8 14 26;
+  --foreground: 245 247 250;
+
+  --card: 15 23 42;
+  --card-foreground: 245 247 250;
+  --popover: 15 23 42;
+  --popover-foreground: 245 247 250;
+  --secondary: 20 30 48;
+  --secondary-foreground: 245 247 250;
+  --muted: 20 30 48;
+  --muted-foreground: 148 163 184;
+
+  --border: 30 41 59;
+  --input: 30 41 59;
+  --ring: 99 102 241;
+
+  --primary: 99 102 241;
+  --primary-foreground: 255 255 255;
+  --accent: 40 45 65;
+  --accent-foreground: 196 181 253;
+
+  --destructive: 239 68 68;
+  --destructive-foreground: 255 255 255;
+  --success: 16 185 129;
+  --success-foreground: 255 255 255;
+  --warning: 245 158 11;
+  --warning-foreground: 255 255 255;
+
+  --veyra-navy: 8 14 26;
+  --veyra-indigo: 99 102 241;
+  --veyra-blue: 59 130 246;
+  --veyra-violet: 168 85 247;
+  --veyra-indigo-soft: 30 35 65;
+  --veyra-violet-soft: 40 30 60;
+}
+
+/* Base */
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    background-color: rgb(var(--background));
+    color: rgb(var(--foreground));
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply tracking-tight;
+  }
+}
+
+/* Utilities */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+  }
+  .glass {
+    @apply backdrop-blur-md bg-white/80 border-border/60;
+  }
+}
+
+/* Keep motion optional for people who request reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
