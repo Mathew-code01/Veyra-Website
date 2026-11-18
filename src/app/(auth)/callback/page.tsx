@@ -2,7 +2,8 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { VeyraPlatformClient } from '@/services/platform/client';
 import { apiBaseUrl } from '@/lib/env';
-import { clearOAuthStateCookie, writeTokenCookies } from '@/services/platform/auth';
+import { clearOAuthRedirectCookie, clearOAuthStateCookie, writeTokenCookies } from '@/services/platform/auth';
+import { isTrustedRedirect } from '@/lib/security/redirects';
 
 export const metadata = {
   title: 'Sign in',
@@ -12,22 +13,27 @@ export const metadata = {
 export default async function OAuthCallbackPage({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const cookieStore = await cookies();
-  const provider = String(searchParams.provider ?? '');
-  const code = String(searchParams.code ?? '');
-  const state = String(searchParams.state ?? '');
-  const error = String(searchParams.error ?? '');
-  const errorDescription = String(searchParams.error_description ?? '');
+  const params = await searchParams;
+  const provider = String(params.provider ?? '');
+  const code = String(params.code ?? '');
+  const state = String(params.state ?? '');
+  const error = String(params.error ?? '');
+  const errorDescription = String(params.error_description ?? '');
 
   if (error) {
     clearOAuthStateCookie(cookieStore);
+    clearOAuthRedirectCookie(cookieStore);
     redirect(`/login?error=${encodeURIComponent(errorDescription || error)}`);
   }
 
   const expectedState = cookieStore.get('veyra_oauth_state')?.value;
+  const requestedRedirect = cookieStore.get('veyra_oauth_redirect')?.value;
+  const destination = isTrustedRedirect(requestedRedirect) ? requestedRedirect! : '/dashboard';
   clearOAuthStateCookie(cookieStore);
+  clearOAuthRedirectCookie(cookieStore);
   if (
     (provider !== 'google' && provider !== 'github') ||
     !code ||
@@ -55,5 +61,5 @@ export default async function OAuthCallbackPage({
   }
 
   writeTokenCookies(cookieStore, result.accessToken, result.refreshToken, result.expiresIn);
-  redirect('/dashboard');
+  redirect(destination);
 }

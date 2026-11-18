@@ -246,6 +246,22 @@ export class VeyraPlatformClient {
     }>('POST', API_PATHS.authOAuthAuthorize, body, { auth: false });
   }
 
+  async getDesktopAuthRequest(transactionId: string) {
+    return this.request<{ ok: true; requestId: string; devicePublicKey: string; expiresAt: string }>(
+      'GET', `/api/v1/auth/desktop/transactions/${encodeURIComponent(transactionId)}/browser`, undefined,
+      { auth: false, idempotent: true },
+    );
+  }
+
+  async authorizeDesktopAuth(transactionId: string, sessionEnvelope: {
+    version: 1; ephemeralPublicKey: string; iv: string; tag: string; ciphertext: string;
+  }) {
+    return this.request<{ ok: true; requestId: string; authorized: true }>(
+      'POST', `/api/v1/auth/desktop/transactions/${encodeURIComponent(transactionId)}/authorize`,
+      { sessionEnvelope },
+    );
+  }
+
   async oauthCallback(body: {
     provider: 'google' | 'github';
     code: string;
@@ -447,7 +463,9 @@ export class VeyraPlatformClient {
         features: Record<string, boolean>;
         deviceLimit: number;
         isActive: boolean;
+        isPublished: boolean;
         isDevFixture: boolean;
+        cloudAiMonthlyCostLimitCents: number | null;
         createdAt: string;
       }>;
     }>('GET', API_PATHS.plansList);
@@ -468,10 +486,18 @@ export class VeyraPlatformClient {
         features: Record<string, boolean>;
         deviceLimit: number;
         isActive: boolean;
+        isPublished: boolean;
         isDevFixture: boolean;
+        cloudAiMonthlyCostLimitCents: number | null;
         createdAt: string;
       };
     }>('GET', API_PATHS.plansGet(planId));
+  }
+
+  async updateCloudPlanCostLimit(planId: string, monthlyLimitCents: number | null) {
+    return this.request<{ ok: true; requestId: string; planId: string; monthlyLimitCents: number | null }>(
+      'PUT', `/api/v1/admin/plans/${encodeURIComponent(planId)}/cloud-cost-limit`, { monthlyLimitCents },
+    );
   }
 
   /* ========================================================================
@@ -505,6 +531,8 @@ export class VeyraPlatformClient {
         planId: string;
         planName: string;
         planFamily: string;
+        description?: string;
+        currency: string;
         amountCents: number;
         billingInterval: 'monthly' | 'yearly';
         isAvailable: boolean;
@@ -603,6 +631,7 @@ export class VeyraPlatformClient {
   async createCheckoutSession(body: {
     planId: string;
     billingInterval: 'monthly' | 'yearly';
+    currency: string;
     successUrl: string;
     cancelUrl: string;
   }) {
@@ -662,6 +691,23 @@ export class VeyraPlatformClient {
         createdAt: string;
       }>;
     }>('GET', API_PATHS.usageHistory, undefined, { idempotent: true });
+  }
+
+  async getCloudAllowance() {
+    return this.request<{
+      ok: true;
+      requestId: string;
+      allowance: {
+        entitled: boolean;
+        reason?: string;
+        limitCents: number | null;
+        usedCents: number;
+        remainingCents: number | null;
+        percentUsed: number | null;
+        periodStart: string | null;
+        periodEnd: string | null;
+      };
+    }>('GET', '/api/v1/usage/cloud-allowance', undefined, { idempotent: true });
   }
 
   async reserveCredits(body: {

@@ -23,6 +23,13 @@ export default function BillingPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
+  const [checkoutNotice, setCheckoutNotice] = useState<string | null>(null);
+
+  useEffect(() => {
+    const status = new URLSearchParams(window.location.search).get('checkout');
+    if (status === 'complete') setCheckoutNotice('Checkout returned. Your subscription will appear here after the Platform verifies payment. This return page does not confirm a charge.');
+    if (status === 'cancelled') setCheckoutNotice('Checkout was cancelled. No subscription change was made.');
+  }, []);
 
   useEffect(() => {
     if (!client || !session?.accessToken) return;
@@ -99,6 +106,8 @@ export default function BillingPage() {
         </p>
       </div>
 
+      {checkoutNotice && <div role="status" className="mb-6 rounded-xl border border-indigo-100 bg-indigo-50/60 px-4 py-3 text-sm text-slate-700">{checkoutNotice}</div>}
+
       {loading && (
         <div className="rounded-xl border border-border bg-card p-8 animate-pulse">
           <div className="h-10 bg-secondary/50 rounded" />
@@ -110,7 +119,7 @@ export default function BillingPage() {
           <AlertTriangle className="h-8 w-8 mx-auto mb-3 text-muted-foreground" />
           <h3 className="text-lg font-semibold text-veyra-navy mb-2">No active subscription</h3>
           <p className="text-sm text-muted-foreground mb-4">
-            You don't have an active plan. Select a plan below to subscribe.
+            You don't have a managed Cloud subscription. A free account can still use supported Local AI or configure a provider key in Desktop.
           </p>
           {plans.length > 0 ? (
             <div className="flex justify-center gap-4">
@@ -122,7 +131,7 @@ export default function BillingPage() {
             </div>
           ) : (
             <p className="text-xs text-muted-foreground">
-              No plans available from the Platform yet. Commercial pricing has not been configured.
+              No approved Cloud offer is published for your account's region yet. Local AI and BYOK are separate usage methods and do not require a VEYRA Cloud subscription.
             </p>
           )}
         </div>

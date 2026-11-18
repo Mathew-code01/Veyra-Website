@@ -9,6 +9,7 @@ import { getSafeRedirect } from '@/lib/security/redirects';
 const ACCESS_TOKEN_COOKIE = 'veyra_access_token';
 const REFRESH_TOKEN_COOKIE = 'veyra_refresh_token';
 const OAUTH_STATE_COOKIE = 'veyra_oauth_state';
+const OAUTH_REDIRECT_COOKIE = 'veyra_oauth_redirect';
 const REFRESH_TOKEN_MAX_AGE = 60 * 60 * 24 * 7;
 
 type AuthCookieOptions = {
@@ -139,6 +140,18 @@ export function writeOAuthStateCookie(cookieStore: AuthCookieStore, state: strin
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     httpOnly: true,
+  });
+}
+
+export function writeOAuthRedirectCookie(cookieStore: AuthCookieStore, redirectTo: string): void {
+  cookieStore.set(OAUTH_REDIRECT_COOKIE, getSafeRedirect(redirectTo, '/dashboard'), {
+    path: '/callback', maxAge: 10 * 60, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', httpOnly: true,
+  });
+}
+
+export function clearOAuthRedirectCookie(cookieStore: AuthCookieStore): void {
+  cookieStore.set(OAUTH_REDIRECT_COOKIE, '', {
+    path: '/callback', maxAge: 0, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', httpOnly: true,
   });
 }
 

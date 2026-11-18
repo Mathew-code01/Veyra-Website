@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import { useAuth } from '@/components/auth/auth-provider';
 import { VeyraPlatformClient } from '@/services/platform/client';
 import { userFriendlyMessage, isAuthError, isPermissionError } from '@/services/platform/errors';
@@ -13,8 +13,9 @@ import { User, Shield, Info, AlertTriangle } from 'lucide-react';
 export default function AdminUserDetails({
   params,
 }: {
-  params: { userId: string };
+  params: Promise<{ userId: string }>;
 }) {
+  const { userId } = use(params);
   const { session, client } = useAuth();
   const [user, setUser] = useState<any>(null);
   const [roles, setRoles] = useState<any[]>([]);
@@ -30,9 +31,9 @@ export default function AdminUserDetails({
     const load = async () => {
       try {
         const [u, r, s] = await Promise.all([
-          c.adminLookupUser(params.userId),
-          c.adminListUserRoles(params.userId),
-          c.adminGetSubscription(params.userId),
+          c.adminLookupUser(userId),
+          c.adminListUserRoles(userId),
+          c.adminGetSubscription(userId),
         ]);
         if (!cancelled) {
           setUser(u.user);
@@ -51,7 +52,7 @@ export default function AdminUserDetails({
     };
     load();
     return () => { cancelled = true; };
-  }, [client, session?.accessToken, params.userId]);
+  }, [client, session?.accessToken, userId]);
 
   if (!session) return null;
 

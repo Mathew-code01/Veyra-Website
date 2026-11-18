@@ -5,6 +5,7 @@ const ALLOWED_PATHS = new Set([
   '/login',
   '/register',
   '/callback',
+  '/desktop-auth',
   '/reset-password',
   '/dashboard',
   '/dashboard/settings',
@@ -22,7 +23,8 @@ export function isTrustedRedirect(to: string | null | undefined): boolean {
 
   // Relative path — allowed if it is in the allowlist and has no protocol/host
   if (to.startsWith('/') && !to.startsWith('//')) {
-    return ALLOWED_PATHS.has(to);
+    const url = new URL(to, 'https://veyra.invalid');
+    return url.origin === 'https://veyra.invalid' && ALLOWED_PATHS.has(url.pathname) && !url.hash;
   }
 
   try {

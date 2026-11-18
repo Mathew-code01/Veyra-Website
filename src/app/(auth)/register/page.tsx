@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -23,6 +24,8 @@ const RegisterSchema = z.object({
 });
 
 export default function RegisterPage() {
+  const [redirectTo, setRedirectTo] = useState('/dashboard');
+  useEffect(() => { setRedirectTo(new URLSearchParams(window.location.search).get('redirectTo') ?? '/dashboard'); }, []);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const form = useForm<z.infer<typeof RegisterSchema>>({
@@ -35,6 +38,7 @@ export default function RegisterPage() {
     const fd = new FormData();
     fd.append('email', data.email);
     fd.append('password', data.password);
+    fd.append('redirectTo', redirectTo);
     const result = await registerAction(fd);
     if (result?.error) {
       setError(result.error);
@@ -133,11 +137,11 @@ export default function RegisterPage() {
           </Button>
         </form>
 
-        <OAuthButtons redirectTo="/dashboard" />
+        <OAuthButtons redirectTo={redirectTo} />
 
         <p className="mt-8 text-center text-sm text-muted-foreground">
           Already have an account?{' '}
-          <Link href="/login" className="text-veyra-indigo font-medium hover:underline">
+          <Link href={`/login?redirectTo=${encodeURIComponent(redirectTo)}`} className="text-veyra-indigo font-medium hover:underline">
             Sign in
           </Link>
         </p>

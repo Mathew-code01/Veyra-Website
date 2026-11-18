@@ -22,15 +22,81 @@ function formatCurrency(amountCents: number, currency: string) {
   return formatter.format(amountCents / 100);
 }
 
+type PricingPlan = {
+  planId: string;
+  planName: string;
+  planFamily: string;
+  currency: string;
+  amountCents: number;
+  billingInterval: 'monthly' | 'yearly';
+  isAvailable: boolean;
+};
+
+type CachedPricing = {
+  version: 1;
+  country: string;
+  currency: string;
+  fetchedAt: string;
+  plans: PricingPlan[];
+};
+
+const PRICING_CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+const pricingCacheKey = (country: string, currency: string) =>
+  `veyra:pricing:v1:${country.toUpperCase()}:${currency.toUpperCase()}`;
+
+function isPricingPlan(value: unknown, currency: string): value is PricingPlan {
+  if (!value || typeof value !== 'object') return false;
+  const plan = value as Partial<PricingPlan>;
+  return typeof plan.planId === 'string' && plan.planId.length > 0 &&
+    typeof plan.planName === 'string' && typeof plan.planFamily === 'string' &&
+    (plan.currency === currency || plan.currency === 'USD') && Number.isSafeInteger(plan.amountCents) && plan.amountCents! > 0 &&
+    (plan.billingInterval === 'monthly' || plan.billingInterval === 'yearly') &&
+    typeof plan.isAvailable === 'boolean';
+}
+
+function readCachedPricing(country: string, currency: string): CachedPricing | null {
+  try {
+    const raw = localStorage.getItem(pricingCacheKey(country, currency));
+    if (!raw) return null;
+    const value: unknown = JSON.parse(raw);
+    if (!value || typeof value !== 'object') return null;
+    const cached = value as Partial<CachedPricing>;
+    const fetchedAt = typeof cached.fetchedAt === 'string' ? Date.parse(cached.fetchedAt) : NaN;
+    if (cached.version !== 1 || cached.country !== country || cached.currency !== currency ||
+      !Number.isFinite(fetchedAt) || fetchedAt > Date.now() ||
+      Date.now() - fetchedAt > PRICING_CACHE_MAX_AGE_MS || !Array.isArray(cached.plans) ||
+      cached.plans.length === 0 || !cached.plans.every((plan) => isPricingPlan(plan, currency))) return null;
+    return cached as CachedPricing;
+  } catch {
+    return null;
+  }
+}
+
+function validatePricingPlans(value: unknown, currency: string): PricingPlan[] {
+  if (!Array.isArray(value) || !value.every((plan) => isPricingPlan(plan, currency))) {
+    throw new Error('The Platform returned invalid regional pricing data.');
+  }
+  return value;
+}
+
 export default function PricingPage() {
   const { session, client } = useAuth();
   const [countries, setCountries] = useState<any[]>([]);
   const [detected, setDetected] = useState<{ country: string; currency: string; currencySymbol: string } | null>(null);
-  const [plans, setPlans] = useState<any[]>([]);
+  const [plans, setPlans] = useState<PricingPlan[]>([]);
+  const [plansSource, setPlansSource] = useState<'live' | 'cache' | null>(null);
+  const [cachedAt, setCachedAt] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [plansLoading, setPlansLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [checkoutPlanId, setCheckoutPlanId] = useState<string | null>(null);
+  const [checkoutNotice, setCheckoutNotice] = useState<string | null>(null);
+
+  useEffect(() => {
+    const checkout = new URLSearchParams(window.location.search).get('checkout');
+    if (checkout === 'complete') setCheckoutNotice('Checkout returned successfully. The Platform will show an active plan only after payment is verified.');
+    if (checkout === 'cancelled') setCheckoutNotice('Checkout was cancelled. No subscription change was made.');
+  }, []);
 
   useEffect(() => {
     if (!client) return;
@@ -79,17 +145,42 @@ export default function PricingPage() {
     if (!client || !detected) return;
     const c = client as VeyraPlatformClient;
     let cancelled = false;
-    setPlans([]);
+    setError(null);
+    const cached = readCachedPricing(detected.country, detected.currency);
+    setPlans(cached?.plans ?? []);
+    setPlansSource(cached ? 'cache' : null);
+    setCachedAt(cached?.fetchedAt ?? null);
     setPlansLoading(true);
     const load = async () => {
       try {
         const result = await c.getPlanPricing(detected.country, detected.currency);
-        if (!cancelled && result.ok) {
-          setPlans(result.plans);
+        if (!result.ok) throw new Error('The Platform could not load pricing for this region.');
+        const livePlans = validatePricingPlans(result.plans, detected.currency);
+        const pricingMetadata = result as typeof result & { source?: 'live' | 'cache'; retrievedAt?: string; checkoutAvailable?: boolean };
+        const responseIsCached = pricingMetadata.source === 'cache' || pricingMetadata.checkoutAvailable === false;
+        const retrievedAt = responseIsCached && typeof pricingMetadata.retrievedAt === 'string' && Number.isFinite(Date.parse(pricingMetadata.retrievedAt))
+          ? pricingMetadata.retrievedAt
+          : new Date().toISOString();
+        if (!cancelled) {
+          setPlans(livePlans);
+          setPlansSource(responseIsCached ? 'cache' : 'live');
+          setCachedAt(responseIsCached ? retrievedAt : null);
+          try {
+            const key = pricingCacheKey(detected.country, detected.currency);
+            if (livePlans.length) {
+              localStorage.setItem(key, JSON.stringify({ version: 1, country: detected.country, currency: detected.currency, fetchedAt: retrievedAt, plans: livePlans } satisfies CachedPricing));
+            } else {
+              localStorage.removeItem(key);
+            }
+          } catch {
+            // A storage restriction does not prevent live pricing or checkout.
+          }
         }
       } catch (err: any) {
-        if (!isAuthError(err)) {
-          setError(userFriendlyMessage(err));
+        if (!cancelled && !isAuthError(err)) {
+          setError(cached
+            ? 'The Platform is temporarily unavailable. Showing the last verified price; checkout is disabled until the current offer can be confirmed.'
+            : userFriendlyMessage(err));
         }
       } finally {
         if (!cancelled) setPlansLoading(false);
@@ -99,19 +190,25 @@ export default function PricingPage() {
     return () => { cancelled = true; };
   }, [client, detected]);
 
-  const startCheckout = async (plan: { planId: string; billingInterval: 'monthly' | 'yearly' }) => {
+  const startCheckout = async (plan: { planId: string; billingInterval: 'monthly' | 'yearly'; currency: string }) => {
+    if (plansSource !== 'live') {
+      setError('Reconnect to the Platform to verify the current offer before checkout.');
+      return;
+    }
     if (!session?.accessToken) {
       window.location.assign(`/login?redirectTo=${encodeURIComponent('/pricing')}`);
       return;
     }
 
     if (!client) return;
-    setCheckoutPlanId(plan.planId);
+    const offerKey = `${plan.planId}:${plan.billingInterval}`;
+    setCheckoutPlanId(offerKey);
     setError(null);
     try {
       const result = await (client as VeyraPlatformClient).createCheckoutSession({
         planId: plan.planId,
         billingInterval: plan.billingInterval,
+        currency: plan.currency,
         successUrl: `${window.location.origin}/dashboard/billing?checkout=complete`,
         cancelUrl: `${window.location.origin}/pricing?checkout=cancelled`,
       });
@@ -151,11 +248,31 @@ export default function PricingPage() {
           </div>
         </section>
 
+        <section className="border-b border-border bg-indigo-50/60 py-10">
+          <div className="mx-auto grid max-w-5xl gap-4 px-4 md:grid-cols-3 lg:px-8">
+            <div className="rounded-xl border border-indigo-100 bg-white p-5">
+              <h2 className="font-semibold text-veyra-navy">Managed Cloud AI</h2>
+              <p className="mt-2 text-sm text-muted-foreground">A VEYRA Cloud subscription appears here only when an approved regional plan and price are published.</p>
+            </div>
+            <div className="rounded-xl border border-border bg-white p-5">
+              <h2 className="font-semibold text-veyra-navy">Bring your own provider</h2>
+              <p className="mt-2 text-sm text-muted-foreground">Connect a supported provider in Desktop. Provider usage is billed by that provider under its own account and terms.</p>
+            </div>
+            <div className="rounded-xl border border-border bg-white p-5">
+              <h2 className="font-semibold text-veyra-navy">Local AI</h2>
+              <p className="mt-2 text-sm text-muted-foreground">Run compatible models on your computer. Availability and hardware requirements depend on your device.</p>
+            </div>
+          </div>
+          <p className="mx-auto mt-4 max-w-5xl px-4 text-xs text-muted-foreground lg:px-8">Local inference and BYOK are usage methods, not VEYRA Cloud subscriptions. Hybrid use combines the methods you configure; it does not imply an included cloud allowance.</p>
+        </section>
+
+        {checkoutNotice && <div role="status" className="mx-auto mt-6 max-w-5xl rounded-xl border border-indigo-100 bg-white px-4 py-3 text-sm text-slate-700">{checkoutNotice}</div>}
+
         <section className="py-20">
           <div className="max-w-5xl mx-auto px-4 lg:px-8">
             {countries.length > 0 && (
               <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <label htmlFor="pricing-region" className="text-sm font-medium text-slate-700">Prices shown for your selected region</label>
+                <label htmlFor="pricing-region" className="text-sm font-medium text-slate-700">Regional prices and explicitly configured USD offers</label>
                 <select
                   id="pricing-region"
                   value={detected ? `${detected.country}:${detected.currency}` : ''}
@@ -175,12 +292,15 @@ export default function PricingPage() {
               </div>
             )}
 
-            {plansLoading && detected ? (
+            {plansLoading && !plans.length && detected ? (
               <div role="status" className="rounded-xl border border-border bg-white p-8 text-center text-sm text-slate-600">Loading configured plans...</div>
             ) : detected && plans.length > 0 ? (
+              <>
+              {plansSource === 'cache' && cachedAt && <div role="status" className="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">Showing the last verified price retrieved {new Date(cachedAt).toLocaleString()}. It is for reference only; reconnect to confirm the offer before checkout.</div>}
               <div className="grid md:grid-cols-3 gap-6">
-                {plans.map((plan: any) => (
-                  <Card key={plan.planId} className="overflow-hidden hover:shadow-lg transition-shadow">
+                {plans.map((plan) => {
+                  const offerKey = `${plan.planId}:${plan.billingInterval}`;
+                  return <Card key={offerKey} className="overflow-hidden hover:shadow-lg transition-shadow">
                     <CardHeader>
                       <CardTitle>{plan.planName}</CardTitle>
                       <CardDescription>{plan.planFamily}</CardDescription>
@@ -188,30 +308,33 @@ export default function PricingPage() {
                     <CardContent>
                       <div className="flex items-baseline gap-2 mb-4">
                         <span className="text-3xl font-bold text-veyra-navy">
-                          {formatCurrency(plan.amountCents, detected.currency)}
+                          {formatCurrency(plan.amountCents, plan.currency)}
                         </span>
                         <span className="text-sm text-muted-foreground">/{plan.billingInterval}</span>
                       </div>
                       <p className="text-sm text-muted-foreground mb-4">
-                        Available: {plan.isAvailable ? 'Yes' : 'No'}
+                        {plan.currency === detected.currency ? 'Regional price' : `${plan.currency} offer; no currency conversion applied`}
                       </p>
                     </CardContent>
                     <CardFooter>
                       <Button
-                        disabled={!plan.isAvailable || checkoutPlanId === plan.planId}
+                        disabled={!plan.isAvailable || plansSource !== 'live' || checkoutPlanId === offerKey}
                         onClick={() => startCheckout(plan)}
                         className="w-full"
                       >
-                        {checkoutPlanId === plan.planId
+                        {checkoutPlanId === offerKey
                           ? 'Connecting to checkout…'
+                          : plansSource !== 'live'
+                            ? 'Price needs verification'
                           : session?.accessToken
                             ? 'Continue to checkout'
                             : 'Sign in to continue'}
                       </Button>
                     </CardFooter>
-                  </Card>
-                ))}
+                  </Card>;
+                })}
               </div>
+              </>
             ) : (
               <div className="rounded-xl border border-dashed border-border bg-secondary/50 p-8 text-center">
                 <h3 className="text-lg font-semibold text-veyra-navy mb-2">{error ? 'Regional pricing is unavailable' : detected ? 'No plans available yet' : 'Regional pricing could not be loaded'}</h3>

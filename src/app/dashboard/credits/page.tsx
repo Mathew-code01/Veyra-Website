@@ -20,6 +20,16 @@ export default function CreditsPage() {
     createdAt: string;
   }>>([]);
   const [error, setError] = useState<string | null>(null);
+  const [allowance, setAllowance] = useState<{
+    entitled: boolean;
+    reason?: string;
+    limitCents: number | null;
+    usedCents: number;
+    remainingCents: number | null;
+    percentUsed: number | null;
+    periodStart: string | null;
+    periodEnd: string | null;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -28,13 +38,14 @@ export default function CreditsPage() {
     let cancelled = false;
     const load = async () => {
       let loadError: string | null = null;
-      const [balanceResult, usageResult] = await Promise.allSettled([
+      const [balanceResult, usageResult, allowanceResult] = await Promise.allSettled([
         c.getCreditBalance(),
         c.listUsageHistory(),
+        c.getCloudAllowance(),
       ]);
       if (cancelled) return;
 
-      const authFailure = [balanceResult, usageResult].find(
+      const authFailure = [balanceResult, usageResult, allowanceResult].find(
         (result) => result.status === 'rejected' && isAuthError(result.reason),
       );
       if (authFailure) {
@@ -51,6 +62,11 @@ export default function CreditsPage() {
         setUsage(usageResult.value.usage);
       } else if (!loadError) {
         loadError = userFriendlyMessage(usageResult.reason);
+      }
+      if (allowanceResult.status === 'fulfilled') {
+        setAllowance(allowanceResult.value.allowance);
+      } else if (!loadError) {
+        loadError = userFriendlyMessage(allowanceResult.reason);
       }
       setError(loadError);
       setLoading(false);
@@ -95,6 +111,49 @@ export default function CreditsPage() {
         <CardFooter className="text-xs text-muted-foreground">
           Amounts are shown in the currency returned by the Platform.
         </CardFooter>
+      </Card>
+
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>Cloud AI subscription usage</CardTitle>
+          <CardDescription>
+            Managed Cloud AI usage is checked against the allowance for your active billing period. Local AI and BYOK usage do not use this allowance.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="h-16 animate-pulse rounded-md bg-secondary/60" aria-label="Loading Cloud AI allowance" />
+          ) : allowance?.entitled && allowance.limitCents !== null ? (
+            <>
+              <div className="mb-2 flex items-baseline justify-between gap-4">
+                <span className="font-semibold text-veyra-navy">{allowance.percentUsed ?? 0}% of allowance used</span>
+                <span className="text-sm text-muted-foreground">
+                  ${((allowance.remainingCents ?? 0) / 100).toFixed(2)} remaining
+                </span>
+              </div>
+              <div
+                className="h-2 overflow-hidden rounded-full bg-secondary"
+                role="meter"
+                aria-label="Cloud AI allowance used"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={allowance.percentUsed ?? 0}
+              >
+                <div className="h-full rounded-full bg-primary transition-[width]" style={{ width: `${allowance.percentUsed ?? 0}%` }} />
+              </div>
+              <p className="mt-3 text-xs text-muted-foreground">
+                Resets with your subscription period{allowance.periodEnd ? ` on ${new Date(allowance.periodEnd).toLocaleDateString()}` : ''}. This is an internal fair-use allowance; provider costs vary by model and workload.
+              </p>
+            </>
+          ) : (
+            <div className="rounded-lg border border-dashed border-border bg-secondary/40 p-5">
+              <p className="font-medium text-veyra-navy">No active Cloud AI allowance</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {allowance?.reason ?? 'The Platform has not returned an active Cloud AI subscription for this account.'} You can continue using eligible local models or your own provider credentials.
+              </p>
+            </div>
+          )}
+        </CardContent>
       </Card>
 
       {error && (

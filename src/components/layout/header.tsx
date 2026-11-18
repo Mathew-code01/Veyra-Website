@@ -31,15 +31,15 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/95">
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between py-3 lg:px-8 px-4 w-full">
-        <div className="flex items-center gap-2 lg:px-0">
+      <div className="flex w-full flex-row items-center justify-between gap-2 px-4 py-3 lg:px-8">
+        <div className="flex shrink-0 items-center gap-2">
           <Link href="/" className="flex items-center gap-2">
             <VeyraLogo size="md" />
             <span className="font-bold text-xl tracking-tight text-veyra-navy">VEYRA</span>
           </Link>
         </div>
 
-        <nav className="hidden lg:flex items-center space-x-8">
+        <nav className="hidden items-center space-x-8 lg:flex">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
@@ -51,7 +51,7 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           {isAuthenticated ? (
             <div className="flex items-center gap-2 ml-2">
               <button

@@ -8,6 +8,9 @@ lerna-debug.log*
 
 # Next.js
 .next/
+.next-dev/
+.next-production-verify/
+.next-pricing-verify/
 out/
 build/
 

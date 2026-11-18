@@ -4,7 +4,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { VeyraPlatformClient } from '@/services/platform/client';
 import { apiBaseUrl } from '@/lib/env';
-import { clearOAuthStateCookie, clearTokenCookies, writeOAuthStateCookie, writeTokenCookies } from '@/services/platform/auth';
+import { clearOAuthStateCookie, clearTokenCookies, writeOAuthStateCookie, writeOAuthRedirectCookie, writeTokenCookies } from '@/services/platform/auth';
 import { isTrustedRedirect } from '@/lib/security/redirects';
 import { userFriendlyMessage, normalizeError } from '@/services/platform/errors';
 
@@ -116,6 +116,8 @@ export async function oauthStartAction(formData: FormData) {
     return { error: 'Choose a supported sign-in provider.' };
   }
   const provider = providerValue;
+  const redirectValue = String(formData.get('redirectTo') ?? '/dashboard');
+  const safeRedirect = isTrustedRedirect(redirectValue) ? redirectValue : '/dashboard';
   const client = getClient();
   // Platform's authorization schema accepts only absolute redirect URLs and
   // currently routes OAuth through the Website callback configured in Supabase.
@@ -128,5 +130,6 @@ export async function oauthStartAction(formData: FormData) {
     return { error: userFriendlyMessage(normalized), code: normalized.code };
   }
   writeOAuthStateCookie(await cookies(), result.state);
+  writeOAuthRedirectCookie(await cookies(), safeRedirect);
   redirect(result.authorizationUrl);
 }

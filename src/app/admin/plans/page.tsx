@@ -16,12 +16,21 @@ export default function AdminPlans() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [permissionError, setPermissionError] = useState<string | null>(null);
+  const [allowanceInputs, setAllowanceInputs] = useState<Record<string, string>>({});
+  const [savingPlanId, setSavingPlanId] = useState<string | null>(null);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!client || !session?.accessToken) return;
     const c = client as VeyraPlatformClient;
     c.listPlans()
-      .then((r) => setPlans(r.plans))
+      .then((r) => {
+        setPlans(r.plans);
+        setAllowanceInputs(Object.fromEntries(r.plans.map((plan) => [
+          plan.id,
+          plan.cloudAiMonthlyCostLimitCents == null ? '' : (plan.cloudAiMonthlyCostLimitCents / 100).toFixed(2),
+        ])));
+      })
       .catch((err: any) => {
         if (isPermissionError(err)) setPermissionError('Admin role required.');
         else if (!isAuthError(err)) setError(userFriendlyMessage(err));
@@ -30,6 +39,29 @@ export default function AdminPlans() {
   }, [client, session?.accessToken]);
 
   if (!session) return null;
+
+  const saveAllowance = async (planId: string) => {
+    if (!client) return;
+    const raw = allowanceInputs[planId]?.trim() ?? '';
+    const amount = raw === '' ? null : Math.round(Number(raw) * 100);
+    if (amount !== null && (!Number.isFinite(amount) || amount <= 0 || amount > 1_000_000)) {
+      setError('Enter a positive monthly USD cost limit up to $10,000, or leave it blank to disable Cloud AI for this plan.');
+      return;
+    }
+    setSavingPlanId(planId);
+    setError(null);
+    setSaveMessage(null);
+    try {
+      await (client as VeyraPlatformClient).updateCloudPlanCostLimit(planId, amount);
+      setPlans((current) => current.map((plan) => plan.id === planId ? { ...plan, cloudAiMonthlyCostLimitCents: amount } : plan));
+      setSaveMessage('Internal Cloud AI cost limit saved.');
+    } catch (err: any) {
+      if (isPermissionError(err)) setPermissionError('Billing administrator access required.');
+      else setError(userFriendlyMessage(err));
+    } finally {
+      setSavingPlanId(null);
+    }
+  };
 
   if (permissionError) {
     return (
@@ -73,6 +105,7 @@ export default function AdminPlans() {
                     <th className="pb-3 font-medium">Family</th>
                     <th className="pb-3 font-medium">Price</th>
                     <th className="pb-3 font-medium">Interval</th>
+                    <th className="pb-3 font-medium">Internal monthly Cloud cost limit</th>
                     <th className="pb-3 font-medium text-center">Active</th>
                   </tr>
                 </thead>
@@ -83,6 +116,24 @@ export default function AdminPlans() {
                       <td className="pb-4 text-muted-foreground">{p.family}</td>
                       <td className="pb-4">${(p.priceCents / 100).toFixed(2)}</td>
                       <td className="pb-4 text-muted-foreground">{p.billingInterval}</td>
+                      <td className="pb-4">
+                        <div className="flex min-w-56 items-center gap-2">
+                          <label className="sr-only" htmlFor={`cloud-limit-${p.id}`}>Monthly provider cost limit in USD</label>
+                          <span aria-hidden="true">$</span>
+                          <input
+                            id={`cloud-limit-${p.id}`}
+                            inputMode="decimal"
+                            value={allowanceInputs[p.id] ?? ''}
+                            onChange={(event) => setAllowanceInputs((current) => ({ ...current, [p.id]: event.target.value }))}
+                            placeholder="Disabled"
+                            className="h-9 w-24 rounded-md border border-border bg-background px-2 text-sm"
+                          />
+                          <Button size="sm" variant="outline" disabled={savingPlanId === p.id} onClick={() => saveAllowance(p.id)}>
+                            {savingPlanId === p.id ? 'Saving…' : 'Save'}
+                          </Button>
+                        </div>
+                        <p className="mt-1 text-xs text-muted-foreground">Cost ceiling per subscription period, not user credits.</p>
+                      </td>
                       <td className="pb-4 text-center">
                         <Badge variant={p.isActive ? 'success' : 'secondary'}>
                           {p.isActive ? 'Active' : 'Inactive'}
@@ -97,6 +148,7 @@ export default function AdminPlans() {
         </Card>
       )}
       {error && <div className="rounded-md border border-red-200 bg-red-50 p-4 mt-6 text-sm text-red-800">{error}</div>}
+      {saveMessage && <div role="status" className="rounded-md border border-emerald-200 bg-emerald-50 p-4 mt-6 text-sm text-emerald-800">{saveMessage}</div>}
     </div>
   );
 }
