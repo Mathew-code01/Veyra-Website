@@ -85,6 +85,12 @@ export const API_PATHS = {
   pricingPlans: '/api/v1/pricing/plans',
   pricingDetect: '/api/v1/pricing/detect',
 
+  // Exchange rates
+  exchangeRateLatest: '/api/v1/exchange/latest',
+  exchangeRate: '/api/v1/exchange/rate',
+  exchangeConvert: '/api/v1/exchange/convert',
+  exchangeHistorical: '/api/v1/exchange/historical',
+
   // Notifications
   notificationsTest: '/api/v1/notifications/notify/test',
   notificationsStatus: '/api/v1/notifications/status',

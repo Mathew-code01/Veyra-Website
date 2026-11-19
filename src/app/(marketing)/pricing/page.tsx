@@ -86,6 +86,8 @@ export default function PricingPage() {
   const [plans, setPlans] = useState<PricingPlan[]>([]);
   const [plansSource, setPlansSource] = useState<'live' | 'cache' | null>(null);
   const [cachedAt, setCachedAt] = useState<string | null>(null);
+  const [exchangeRate, setExchangeRate] = useState<{ rate: number; timestamp: string; isLive: boolean } | null>(null);
+  const [exchangeRateError, setExchangeRateError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [plansLoading, setPlansLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -184,6 +186,34 @@ export default function PricingPage() {
         }
       } finally {
         if (!cancelled) setPlansLoading(false);
+      }
+    };
+    load();
+    return () => { cancelled = true; };
+  }, [client, detected]);
+
+  // Fetch exchange rate for the detected currency
+  useEffect(() => {
+    if (!client || !detected) return;
+    const c = client as VeyraPlatformClient;
+    let cancelled = false;
+    const load = async () => {
+      try {
+        // Only fetch exchange rate if the detected currency differs from USD
+        if (detected.currency === 'USD') {
+          setExchangeRate({ rate: 1, timestamp: new Date().toISOString(), isLive: true });
+          return;
+        }
+        const result = await c.getExchangeRate('USD', detected.currency);
+        if (!result.ok) throw new Error('Failed to fetch exchange rate');
+        setExchangeRate({
+          rate: result.rate,
+          timestamp: result.timestamp,
+          isLive: true,
+        });
+      } catch (err: any) {
+        // Exchange rate failure should not block pricing display
+        setExchangeRateError(err instanceof Error ? err.message : 'Failed to load exchange rate');
       }
     };
     load();
@@ -300,6 +330,10 @@ export default function PricingPage() {
               <div className="grid md:grid-cols-3 gap-6">
                 {plans.map((plan) => {
                   const offerKey = `${plan.planId}:${plan.billingInterval}`;
+                  const rate = exchangeRate?.rate ?? 1;
+                  const isSameCurrency = plan.currency === detected.currency;
+                  const convertedAmount = isSameCurrency ? plan.amountCents : Math.round((plan.amountCents * rate) * 100) / 100;
+                  const rateInfo = exchangeRate?.rate ? `1 USD = ${exchangeRate.rate.toFixed(4)} ${detected.currency}` : null;
                   return <Card key={offerKey} className="overflow-hidden hover:shadow-lg transition-shadow">
                     <CardHeader>
                       <CardTitle>{plan.planName}</CardTitle>
@@ -308,12 +342,14 @@ export default function PricingPage() {
                     <CardContent>
                       <div className="flex items-baseline gap-2 mb-4">
                         <span className="text-3xl font-bold text-veyra-navy">
-                          {formatCurrency(plan.amountCents, plan.currency)}
+                          {formatCurrency(convertedAmount, plan.currency)}
                         </span>
                         <span className="text-sm text-muted-foreground">/{plan.billingInterval}</span>
                       </div>
                       <p className="text-sm text-muted-foreground mb-4">
-                        {plan.currency === detected.currency ? 'Regional price' : `${plan.currency} offer; no currency conversion applied`}
+                        {isSameCurrency
+                          ? 'Regional price'
+                          : `Converted from USD at rate ${exchangeRate?.rate?.toFixed(4)}. ${exchangeRate.isLive ? '' : 'Uses cached rate — may be stale.'}`}
                       </p>
                     </CardContent>
                     <CardFooter>
@@ -326,7 +362,7 @@ export default function PricingPage() {
                           ? 'Connecting to checkout…'
                           : plansSource !== 'live'
                             ? 'Price needs verification'
-                          : session?.accessToken
+                            : session?.accessToken
                             ? 'Continue to checkout'
                             : 'Sign in to continue'}
                       </Button>
@@ -346,30 +382,31 @@ export default function PricingPage() {
                   No prices are invented here.
                 </p>
               </div>
-            )}
-          </div>
-        </section>
-
-        <section className="py-20 bg-secondary/50">
-          <div className="max-w-3xl mx-auto px-4 lg:px-8">
-            <div className="rounded-2xl border border-border bg-card p-8 lg:p-12">
-              <h2 className="text-2xl font-bold text-veyra-navy mb-6">How billing works</h2>
-              <ul className="space-y-4 text-sm text-muted-foreground max-w-lg mx-auto">
-                <li className="flex items-start gap-3">
-                  <span className="mt-0.5 h-3 w-3 rounded-full bg-veyra-indigo" />
-                  <span>Checkout is initiated through the Platform ({'/api/v1/payments/checkout'}).</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="mt-0.5 h-3 w-3 rounded-full bg-veyra-indigo" />
-                  <span>Payment state comes from verified Platform records and webhooks — never from the browser.</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="mt-0.5 h-3 w-3 rounded-full bg-veyra-indigo" />
-                  <span>Subscriptions can be cancelled or reactivated through your dashboard.</span>
-                </li>
-              </ul>
+              )}
             </div>
-          </div>
+          </section>
+
+          <section className="py-20 bg-secondary/50">
+            <div className="max-w-3xl mx-auto px-4 lg:px-8">
+              <div className="rounded-2xl border border-border bg-card p-8 lg:p-12">
+                <h2 className="text-2xl font-bold text-veyra-navy mb-6">How billing works</h2>
+                <ul className="space-y-4 text-sm text-muted-foreground max-w-lg mx-auto">
+                  <li className="flex items-start gap-3">
+                    <span className="mt-0.5 h-3 w-3 rounded-full bg-veyra-indigo" />
+                    <span>Checkout is initiated through the Platform ({'/api/v1/payments/checkout'}).</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="mt-0.5 h-3 w-3 rounded-full bg-veyra-indigo" />
+                    <span>Payment state comes from verified Platform records and webhooks — never from the browser.</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="mt-0.5 h-3 w-3 rounded-full bg-veyra-indigo" />
+                    <span>Subscriptions can be cancelled or reactivated through your dashboard.</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </section>
         </section>
       </main>
       <Footer />

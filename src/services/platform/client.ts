@@ -1162,6 +1162,113 @@ export class VeyraPlatformClient {
     }>('GET', `${API_PATHS.adminListPayments}?page=${page}&pageSize=${pageSize}`);
   }
 
+  /* ========================================================================
+   * Exchange Rates
+   * ======================================================================== */
+
+  async listPricingCountries() {
+    return this.request<{
+      ok: boolean;
+      requestId: string;
+      countries: Array<{
+        country: string;
+        countryName: string;
+        currency: string;
+        currencySymbol: string;
+        currencyExponent: number;
+        isSupported: boolean;
+      }>;
+    }>('GET', API_PATHS.pricingCountries, undefined, { auth: false });
+  }
+
+  async getCountryCurrencies(country: string) {
+    return this.request<{
+      ok: boolean;
+      requestId: string;
+      country: string;
+      currencies: Array<{
+        country: string;
+        countryName: string;
+        currency: string;
+        currencySymbol: string;
+        currencyExponent: number;
+        isSupported: boolean;
+      }>;
+    }>('GET', API_PATHS.pricingCountryCurrencies(country), undefined, { auth: false });
+  }
+
+  async getPlanPricing(country: string, currency: string) {
+    return this.request<{
+      ok: boolean;
+      requestId: string;
+      country: string;
+      currency: string;
+      currencySymbol: string;
+      currencyExponent: number;
+      plans: Array<{
+        planId: string;
+        planName: string;
+        planFamily: string;
+        description?: string;
+        currency: string;
+        amountCents: number;
+        billingInterval: 'monthly' | 'yearly';
+        isAvailable: boolean;
+      }>;
+    }>('GET', `${API_PATHS.pricingPlans}?country=${encodeURIComponent(country)}&currency=${encodeURIComponent(currency)}`, undefined, { auth: false });
+  }
+
+  async listExchangeRates(baseCurrency = 'USD') {
+    return this.request<{
+      ok: boolean;
+      requestId: string;
+      baseCurrency: string;
+      rates: Record<string, number>;
+      updatedAt: string;
+    }>('GET', `${API_PATHS.exchangeRateLatest}?baseCurrency=${encodeURIComponent(baseCurrency)}`, undefined, { auth: false });
+  }
+
+  async getExchangeRate(fromCurrency: string, toCurrency: string) {
+    return this.request<{
+      ok: true;
+      requestId: string;
+      fromCurrency: string;
+      toCurrency: string;
+      rate: number;
+      timestamp: string;
+    }>('GET', `${API_PATHS.exchangeRate}?fromCurrency=${encodeURIComponent(fromCurrency)}&toCurrency=${encodeURIComponent(toCurrency)}`, undefined, { auth: false });
+  }
+
+  async convertCurrency(amount: number, fromCurrency: string, toCurrency: string) {
+    return this.request<{
+      ok: true;
+      requestId: string;
+      amount: number;
+      fromCurrency: string;
+      toCurrency: string;
+      convertedAmount: number;
+      rate: number;
+      isLive: boolean;
+      rateTimestamp: string;
+    }>('POST', API_PATHS.exchangeConvert, {
+      amount,
+      fromCurrency,
+      toCurrency,
+    }, { auth: false });
+  }
+
+  async getHistoricalExchangeRate(fromCurrency: string, toCurrency: string, date: string) {
+    return this.request<{
+      ok: true;
+      requestId: string;
+      fromCurrency: string;
+      toCurrency: string;
+      date: string;
+      rate: number;
+      timestamp: string;
+    }>('GET', `${API_PATHS.exchangeHistorical}?fromCurrency=${encodeURIComponent(fromCurrency)}&toCurrency=${encodeURIComponent(toCurrency)}&date=${encodeURIComponent(date)}`, undefined, { auth: false });
+  }
+
   async adminStats() {
     return this.request<{
       ok: boolean;
