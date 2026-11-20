@@ -30,8 +30,8 @@ export function Header() {
   const isAuthenticated = !!session?.accessToken && !isLoading;
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/95">
-      <div className="flex w-full flex-row items-center justify-between gap-2 px-4 py-3 lg:px-8">
+    <header className="sticky top-0 z-50 border-b border-border bg-white dark:bg-veyra-navy">
+      <div className="flex h-[68px] w-full flex-row items-center justify-between gap-2 px-5 lg:px-12">
         <div className="flex shrink-0 items-center gap-2">
           <Link href="/" className="flex items-center gap-2">
             <VeyraLogo size="md" />
@@ -39,7 +39,7 @@ export function Header() {
           </Link>
         </div>
 
-        <nav className="hidden items-center space-x-8 lg:flex">
+        <nav className="hidden items-center space-x-[22px] lg:flex">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}

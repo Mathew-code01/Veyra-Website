@@ -9,24 +9,24 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex items-center justify-center rounded-veyra-sm text-sm font-semibold transition-colors duration-veyra-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
         default: 'bg-veyra-indigo text-white hover:bg-veyra-indigo/90 shadow-sm',
         destructive:
-          'bg-red-500 text-white hover:bg-red-600',
+          'bg-destructive text-destructive-foreground hover:bg-destructive/90',
         outline:
           'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
         secondary:
-          'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+          'border border-input bg-white text-secondary-foreground hover:bg-accent hover:text-accent-foreground',
         ghost:
           'hover:bg-accent hover:text-accent-foreground',
         link:
           'text-primary underline-offset-4 hover:underline',
       },
       size: {
-        default: 'h-10 px-4 py-2',
+        default: 'h-10 px-[18px] py-[10px]',
         sm: 'h-9 rounded-md px-3',
         lg: 'h-11 rounded-md px-8',
         icon: 'h-10 w-10',

@@ -1,0 +1,356 @@
+{
+  "effects": {
+    "helper": {
+      "alpha": "a argument",
+      "color": "#0F1A3D",
+      "blur": "r argument",
+      "offsetX": 0,
+      "offsetY": "y argument",
+      "spread": 0
+    },
+    "shadowStyles": "Three documented; use shadow(y,r,a) helper values per call. No universal values."
+  },
+  "palette": {
+    "successBg": "#E6F5EE",
+    "line": "#E4E7F0",
+    "ink": "#0F1B3D",
+    "lavender200": "#D6CBFF",
+    "neutral": "#EEF0F6",
+    "navy": "#0B1330",
+    "brand": "#6B4FE0",
+    "brand700": "#5638C4",
+    "success": "#1F8A5B",
+    "info": "#2B6CB0",
+    "muted": "#6B7694",
+    "background": "#F7F8FC",
+    "lavender50": "#F5F2FF",
+    "errorBg": "#FDECEC",
+    "error": "#C23B3B",
+    "white": "#FFFFFF",
+    "warningBg": "#FFF4DC",
+    "ink2": "#3B4766",
+    "warning": "#9A6200",
+    "lavender100": "#EAE4FF",
+    "infoBg": "#E8F1FB",
+    "dark": {
+      "navy": "#0B1330",
+      "surfaceSubtle": "#111A3D",
+      "surfaceLavender": "#1D1B4B",
+      "textPrimary": "#F4F5FA",
+      "textSecondary": "#C3C9DB",
+      "textMuted": "#97A0BA",
+      "border": "#2A3358",
+      "brand": "#9A85F5",
+      "brand700": "#B9A9FA",
+      "success": "#46C28A",
+      "warning": "#E6A93A",
+      "error": "#F07A7A",
+      "info": "#6AA9E9"
+    }
+  },
+  "screenCount": 119,
+  "sections": [
+    {
+      "id": "WM",
+      "page": "01",
+      "title": "Marketing pages (1440)"
+    },
+    {
+      "id": "WA",
+      "page": "02",
+      "title": "Account access â€” OAuth only"
+    },
+    {
+      "id": "WP",
+      "page": "03",
+      "title": "Pricing, checkout and billing (prices are placeholders)"
+    },
+    {
+      "id": "WC",
+      "page": "04",
+      "title": "Customer portal"
+    },
+    {
+      "id": "WL",
+      "page": "05",
+      "title": "Legal (placeholder copy) and support"
+    },
+    {
+      "id": "DI",
+      "page": "06",
+      "title": "Installer (options are PROPOSED) and first launch"
+    },
+    {
+      "id": "DA",
+      "page": "07",
+      "title": "Desktop sign-in and permissions"
+    },
+    {
+      "id": "DH",
+      "page": "08",
+      "title": "Hardware, local models and operating mode"
+    },
+    {
+      "id": "DB",
+      "page": "09",
+      "title": "BYOK configuration (providers are illustrative)"
+    },
+    {
+      "id": "AO",
+      "page": "10",
+      "title": "Main application"
+    },
+    {
+      "id": "LP",
+      "page": "11",
+      "title": "Live Copilot â€” pre-flight"
+    },
+    {
+      "id": "LO",
+      "page": "11",
+      "title": "Live Copilot overlay states (light, translucent, floating)"
+    },
+    {
+      "id": "LB",
+      "page": "11",
+      "title": "Readability over four underlying applications"
+    },
+    {
+      "id": "PH",
+      "page": "12",
+      "title": "Practice Studio"
+    },
+    {
+      "id": "RR",
+      "page": "13",
+      "title": "Reports, candidate profile and documents"
+    },
+    {
+      "id": "XO",
+      "page": "14",
+      "title": "Platform Admin Console"
+    },
+    {
+      "id": "ZR",
+      "page": "15",
+      "title": "Responsive and adaptive"
+    },
+    {
+      "id": "ZO",
+      "page": "15",
+      "title": "Overlay sizing"
+    },
+    {
+      "id": "HF",
+      "page": "16",
+      "title": "Handoff reference sheets (verification: Not inspected â€” design specification only)"
+    }
+  ],
+  "overlay": {
+    "status": [
+      "on",
+      "off",
+      "paused",
+      "blocked"
+    ],
+    "motion": "120–200ms ease-out; expand 240ms; reduced motion instant/100ms fade",
+    "confirmedEvidence": "Solid green outline + “Confirmed by you”",
+    "aiSuggestion": "Dashed lavender outline + “AI suggestion”"
+  },
+  "responsive": {
+    "detailedRules": "Not fully specified; inspect per-screen builders and document agent-proposed extensions.",
+    "overlayWidths": [
+      300,
+      380,
+      520
+    ],
+    "viewports": [
+      834,
+      390,
+      900
+    ]
+  },
+  "components": {
+    "documentedVariantCount": 57,
+    "families": [
+      "Button",
+      "Badge",
+      "Input",
+      "Switch",
+      "Checkbox",
+      "Tab",
+      "NavItem",
+      "OverlayControl",
+      "Alert",
+      "Progress",
+      "Toast",
+      "StatusDot",
+      "TableRow",
+      "Modal",
+      "SearchField",
+      "Card",
+      "ProviderCard",
+      "ModelCard",
+      "PricingCard",
+      "Tooltip",
+      "Drawer"
+    ],
+    "keyMeasurements": {
+      "input": "40px height; 12px horizontal padding; 10px radius",
+      "overlay": "White at 80%, 24px background blur; text plate at least 80% opacity",
+      "titlebar": "40px high",
+      "drawer": "420px default width; 24px padding",
+      "searchField": "280x38px default; 12px horizontal padding; radius 10px",
+      "sidebar": "236px default, 68px compact",
+      "button": "14px text / 600; pad 10px vertical,18px horizontal; gap 8px; radius 10px",
+      "modal": "440px default width; 24px padding; 16px radius",
+      "webHeader": "68px high; 48px desktop and 20px mobile horizontal pad"
+    }
+  },
+  "source": "VEYRA-DESIGN-SPECS/dev/src/00_core.js, 10_ds.js, 20_kit.js, 30_shells.js and docs/VEYRA_DESIGN_SYSTEM.md",
+  "assets": [
+    "plugin/assets/veyra-app-icon.svg",
+    "plugin/assets/veyra-mono.svg",
+    "plugin/assets/veyra-symbol.svg"
+  ],
+  "uncertainties": [
+    "Design System v0.2 is proposed; brand marks are not approved.",
+    "Generated screen frames are not visually reviewed in real Figma.",
+    "Per-screen written interaction/state/responsive specs remain unfinished (W-08).",
+    "Prices, allowances, providers, models, sample data and legal copy are placeholders.",
+    "Global letter spacing and universal shadow values are not established.",
+    "Dark palette exists but variable dark mode may be omitted and product behavior is not confirmed."
+  ],
+  "radiusPx": [
+    8,
+    12,
+    16,
+    24
+  ],
+  "typography": {
+    "styles": [
+      {
+        "weight": 700,
+        "name": "Display",
+        "size": 56,
+        "lineHeight": 64
+      },
+      {
+        "weight": 700,
+        "name": "Page heading",
+        "size": 36,
+        "lineHeight": 44
+      },
+      {
+        "weight": 600,
+        "name": "Section heading",
+        "size": 24,
+        "lineHeight": 32
+      },
+      {
+        "weight": 600,
+        "name": "Subheading",
+        "size": 18,
+        "lineHeight": 26
+      },
+      {
+        "weight": 400,
+        "name": "Body",
+        "size": 16,
+        "lineHeight": 24
+      },
+      {
+        "weight": 400,
+        "name": "Body small",
+        "size": 14,
+        "lineHeight": 20
+      },
+      {
+        "weight": 600,
+        "name": "Label",
+        "size": 12,
+        "lineHeight": 16
+      },
+      {
+        "weight": 400,
+        "name": "Helper",
+        "size": 12,
+        "lineHeight": 16
+      }
+    ],
+    "family": "Inter",
+    "fallback": [
+      "Roboto",
+      "Arial"
+    ],
+    "globalLetterSpacing": "Not specified; per-node values in builders",
+    "weights": [
+      400,
+      500,
+      600,
+      700
+    ]
+  },
+  "spacingPx": [
+    4,
+    8,
+    12,
+    16,
+    24,
+    32,
+    48,
+    64
+  ],
+  "icons": {
+    "count": 46,
+    "names": [
+      "x",
+      "check",
+      "search",
+      "mic",
+      "pause",
+      "play",
+      "stop",
+      "minus",
+      "copy",
+      "monitor",
+      "more",
+      "shield",
+      "down",
+      "expand",
+      "right",
+      "plus",
+      "trash",
+      "download",
+      "lock",
+      "key",
+      "cpu",
+      "drive",
+      "file",
+      "alert",
+      "ok",
+      "bell",
+      "card",
+      "laptop",
+      "user",
+      "globe",
+      "grid",
+      "info",
+      "refresh",
+      "eye",
+      "arrow",
+      "clock",
+      "chart",
+      "book",
+      "target",
+      "layers",
+      "users",
+      "server",
+      "tag",
+      "headset",
+      "pen",
+      "sliders"
+    ],
+    "source": "VEYRA-DESIGN-SPECS/dev/src/00_core.js"
+  }
+}

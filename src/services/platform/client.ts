@@ -1166,21 +1166,6 @@ export class VeyraPlatformClient {
    * Exchange Rates
    * ======================================================================== */
 
-  async listPricingCountries() {
-    return this.request<{
-      ok: boolean;
-      requestId: string;
-      countries: Array<{
-        country: string;
-        countryName: string;
-        currency: string;
-        currencySymbol: string;
-        currencyExponent: number;
-        isSupported: boolean;
-      }>;
-    }>('GET', API_PATHS.pricingCountries, undefined, { auth: false });
-  }
-
   async getCountryCurrencies(country: string) {
     return this.request<{
       ok: boolean;
@@ -1195,27 +1180,6 @@ export class VeyraPlatformClient {
         isSupported: boolean;
       }>;
     }>('GET', API_PATHS.pricingCountryCurrencies(country), undefined, { auth: false });
-  }
-
-  async getPlanPricing(country: string, currency: string) {
-    return this.request<{
-      ok: boolean;
-      requestId: string;
-      country: string;
-      currency: string;
-      currencySymbol: string;
-      currencyExponent: number;
-      plans: Array<{
-        planId: string;
-        planName: string;
-        planFamily: string;
-        description?: string;
-        currency: string;
-        amountCents: number;
-        billingInterval: 'monthly' | 'yearly';
-        isAvailable: boolean;
-      }>;
-    }>('GET', `${API_PATHS.pricingPlans}?country=${encodeURIComponent(country)}&currency=${encodeURIComponent(currency)}`, undefined, { auth: false });
   }
 
   async listExchangeRates(baseCurrency = 'USD') {

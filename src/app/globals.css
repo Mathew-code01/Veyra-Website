@@ -6,86 +6,110 @@
 :root {
   --font-inter: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
+  /* Values transcribed from VEYRA-DESIGN-SPECS/dev/src/00_core.js. */
+  --veyra-design-brand: 107 79 224;
+  --veyra-design-brand-hover: 86 56 196;
+  --veyra-design-ink: 15 27 61;
+  --veyra-design-ink-secondary: 59 71 102;
+  --veyra-design-muted: 107 118 148;
+  --veyra-design-line: 228 231 240;
+  --veyra-design-canvas: 247 248 252;
+  --veyra-design-lavender-50: 245 242 255;
+  --veyra-design-lavender-100: 234 228 255;
+  --veyra-design-lavender-200: 214 203 255;
+  --veyra-space-1: 4px;
+  --veyra-space-2: 8px;
+  --veyra-space-3: 12px;
+  --veyra-space-4: 16px;
+  --veyra-space-5: 24px;
+  --veyra-space-6: 32px;
+  --veyra-space-7: 48px;
+  --veyra-space-8: 64px;
+  --veyra-radius-sm: 8px;
+  --veyra-radius-md: 12px;
+  --veyra-radius-lg: 16px;
+  --veyra-radius-xl: 24px;
+
   /* Backgrounds */
-  --background: 255 255 255;
-  --foreground: 15 23 42;
+  --background: var(--veyra-design-canvas);
+  --foreground: var(--veyra-design-ink);
 
   /* Surfaces */
   --card: 255 255 255;
-  --card-foreground: 15 23 42;
+  --card-foreground: var(--veyra-design-ink);
   --popover: 255 255 255;
-  --popover-foreground: 15 23 42;
-  --secondary: 245 247 250;
-  --secondary-foreground: 15 23 42;
-  --muted: 245 247 250;
-  --muted-foreground: 90 100 116;
+  --popover-foreground: var(--veyra-design-ink);
+  --secondary: 245 242 255;
+  --secondary-foreground: var(--veyra-design-ink);
+  --muted: 238 240 246;
+  --muted-foreground: var(--veyra-design-muted);
 
   /* Borders & Inputs */
-  --border: 226 232 240;
-  --input: 226 232 240;
-  --ring: 67 56 202;
+  --border: var(--veyra-design-line);
+  --input: var(--veyra-design-line);
+  --ring: var(--veyra-design-brand);
 
   /* Brand Accents */
-  --primary: 67 56 202;
+  --primary: var(--veyra-design-brand);
   --primary-foreground: 255 255 255;
-  --accent: 234 232 255;
-  --accent-foreground: 67 56 202;
+  --accent: var(--veyra-design-lavender-100);
+  --accent-foreground: var(--veyra-design-brand-hover);
 
   /* Semantic */
-  --destructive: 239 68 68;
+  --destructive: 194 59 59;
   --destructive-foreground: 255 255 255;
-  --success: 16 185 129;
+  --success: 31 138 91;
   --success-foreground: 255 255 255;
-  --warning: 245 158 11;
+  --warning: 154 98 0;
   --warning-foreground: 255 255 255;
 
   /* VEYRA Brand Colors */
-  --veyra-navy: 15 23 42;
-  --veyra-indigo: 67 56 202;
-  --veyra-blue: 59 130 246;
-  --veyra-violet: 124 58 237;
-  --veyra-indigo-soft: 238 236 255;
-  --veyra-violet-soft: 245 240 255;
+  --veyra-navy: 11 19 48;
+  --veyra-indigo: var(--veyra-design-brand);
+  --veyra-blue: 43 108 176;
+  --veyra-violet: 86 56 196;
+  --veyra-indigo-soft: var(--veyra-design-lavender-100);
+  --veyra-violet-soft: var(--veyra-design-lavender-50);
 
   /* Radius */
-  --radius: 0.875rem;
+  --radius: var(--veyra-radius-md);
 }
 
 .dark {
-  --background: 8 14 26;
-  --foreground: 245 247 250;
+  --background: 11 19 48;
+  --foreground: 244 245 250;
 
-  --card: 15 23 42;
-  --card-foreground: 245 247 250;
-  --popover: 15 23 42;
-  --popover-foreground: 245 247 250;
-  --secondary: 20 30 48;
-  --secondary-foreground: 245 247 250;
-  --muted: 20 30 48;
-  --muted-foreground: 148 163 184;
+  --card: 17 26 61;
+  --card-foreground: 244 245 250;
+  --popover: 17 26 61;
+  --popover-foreground: 244 245 250;
+  --secondary: 29 27 75;
+  --secondary-foreground: 244 245 250;
+  --muted: 17 26 61;
+  --muted-foreground: 151 160 186;
 
-  --border: 30 41 59;
-  --input: 30 41 59;
-  --ring: 99 102 241;
+  --border: 42 51 88;
+  --input: 42 51 88;
+  --ring: 154 133 245;
 
-  --primary: 99 102 241;
+  --primary: 154 133 245;
   --primary-foreground: 255 255 255;
-  --accent: 40 45 65;
-  --accent-foreground: 196 181 253;
+  --accent: 29 27 75;
+  --accent-foreground: 185 169 250;
 
-  --destructive: 239 68 68;
+  --destructive: 240 122 122;
   --destructive-foreground: 255 255 255;
-  --success: 16 185 129;
+  --success: 70 194 138;
   --success-foreground: 255 255 255;
-  --warning: 245 158 11;
+  --warning: 230 169 58;
   --warning-foreground: 255 255 255;
 
-  --veyra-navy: 8 14 26;
-  --veyra-indigo: 99 102 241;
-  --veyra-blue: 59 130 246;
-  --veyra-violet: 168 85 247;
-  --veyra-indigo-soft: 30 35 65;
-  --veyra-violet-soft: 40 30 60;
+  --veyra-navy: 11 19 48;
+  --veyra-indigo: 154 133 245;
+  --veyra-blue: 106 169 233;
+  --veyra-violet: 185 169 250;
+  --veyra-indigo-soft: 29 27 75;
+  --veyra-violet-soft: 17 26 61;
 }
 
 /* Base */

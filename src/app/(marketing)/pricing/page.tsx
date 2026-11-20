@@ -349,7 +349,7 @@ export default function PricingPage() {
                       <p className="text-sm text-muted-foreground mb-4">
                         {isSameCurrency
                           ? 'Regional price'
-                          : `Converted from USD at rate ${exchangeRate?.rate?.toFixed(4)}. ${exchangeRate.isLive ? '' : 'Uses cached rate — may be stale.'}`}
+                          : `Converted from USD at rate ${exchangeRate?.rate?.toFixed(4)}. ${exchangeRate?.isLive ? '' : 'Uses cached rate — may be stale.'}`}
                       </p>
                     </CardContent>
                     <CardFooter>
@@ -407,7 +407,6 @@ export default function PricingPage() {
               </div>
             </div>
           </section>
-        </section>
       </main>
       <Footer />
     </div>
