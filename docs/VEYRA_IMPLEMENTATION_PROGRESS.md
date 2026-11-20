@@ -44,7 +44,7 @@ Updated: 2026-11-20 (Africa/Johannesburg)
 - `npm run build` — passed after token, Header and Button updates; optimized compile, type/lint check and 42 pages generated.
 - `git diff --check` — passed during final review.
 - No screenshots captured; no visual comparison claimed.
-- Website changes are uncommitted and local. No commit or push performed.
+- Website milestone committed locally on `feat/veyra-design-foundation`: `5b8d3db` (`feat(website): align design foundation and map coverage`). Not pushed; full implementation remains incomplete and no screenshot comparison has been performed.
 - Desktop/platform Git status was readable using `git -c safe.directory=<repo>`; this did not modify global or repository configuration.
 
 ## Known blockers / limits
