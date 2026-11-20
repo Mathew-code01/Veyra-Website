@@ -5,7 +5,7 @@ Updated: 2026-11-21 (Africa/Johannesburg)
 ## Current position
 
 - Workspace paths verified: `Veyra`, `veyra-website`, `veyra-platform`, and `VEYRA-DESIGN-SPECS` all exist. The expected nested `VEYRA-FIGMA-PRODUCTION-GENERATOR` directory does not; the source package is directly in `VEYRA-DESIGN-SPECS`.
-- Website: branch `feat/veyra-design-foundation`; HEAD `eb96188` before this docs milestone. Existing user change preserved in `docs/ECOSYSTEM_BASELINE_AUDIT.md`.
+- Website: branch `feat/veyra-design-foundation`; docs milestone `4c289f5` (`docs: track desktop design implementation milestone`) pushed to its new matching origin branch. Existing user change preserved in `docs/ECOSYSTEM_BASELINE_AUDIT.md`.
 - Desktop: branch `feat/veyra-phases-12-22`; implementation milestone `61d2cf8` (`feat(desktop): align overview with VEYRA design`) pushed to the existing matching origin branch. Existing user changes in `package.json`, `docs/CREDENTIAL_ROTATION_GUIDANCE.md`, and `scripts/check-secrets.js` remain unstaged and preserved. The existing primary token `#6b4fe0` was retained because it matches the reference brand color.
 - Platform: branch `phase-2/supabase-foundation`; HEAD `2d60eca`, clean at last inspection.
 - Design source reports 119 generated manifest screens across 17 pages and 19 sections, 84 distinct screen-builder bodies, 30 Live Copilot overlay states, 21 component families and 57 variants. The 119 count includes state variants and is not evidence that all product requirements are designed.
