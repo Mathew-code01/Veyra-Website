@@ -1,10 +1,10 @@
 # VEYRA visual QA report
 
-Updated: 2026-11-20 (Africa/Johannesburg)
+Updated: 2026-11-21 (Africa/Johannesburg)
 
 ## Current results
 
-No production screenshot has been captured or compared with a rendered prototype frame in this execution. The design package itself states that the generated frames have not been visually reviewed in Figma. Therefore no screen is reported as visually verified.
+Desktop overview screenshots have been captured and inspected. The design package itself states that generated frames have not been visually reviewed in Figma. The implementation was checked against source-builder structure and exact token measurements, but no rendered design frame was available for side-by-side comparison. Therefore this milestone is implementation-render verified, not Figma-render verified.
 
 ## Reference measurements available
 
@@ -17,6 +17,9 @@ No production screenshot has been captured or compared with a rendered prototype
 | Date | Product / screen | Viewport | Screenshot | Comparison | Functional/responsive checks | Result |
 |---|---|---|---|---|---|---|
 | 2026-11-20 | Website build / route compilation | Build renderer (no visual viewport) | None | Not a visual comparison | Next.js compile, type/lint validation, 42 page generation | Passed; visual QA still pending |
+| 2026-11-21 | Desktop / Main application overview (`AO-01`) | 1280x900 | `C:\tmp\veyra-ui-baseline\dashboard-desktop-final.png` | Captured and inspected against `dev/src/43_app.js::overviewPage` hierarchy and shell tokens: four status cards, Live Copilot and Practice Studio panels, recent sessions table; exact palette/sidebar/header measurements used. No prototype screenshot exists for pixel comparison. | Browser ran with explicit IPC stubs; provider, hardware and session data rendered, no page errors, sidebar mark loaded (157px intrinsic width), Start Live Copilot navigated to `/live`. | Renderer check passed; packaged Electron/live services still unverified |
+| 2026-11-21 | Desktop / Main application overview (`AO-01`) | 390x900 viewport, full-page capture | `C:\tmp\veyra-ui-baseline\dashboard-mobile-final.png` | Captured and inspected at narrow viewport. Cards stack, compact bottom navigation is visible, table retains horizontal scrolling. Fixed navigation overlays the viewport as expected; full-page capture includes the fixed bar at its capture position. | Heading, status cards and session data render without browser errors; route navigation checked at desktop width. | Responsive renderer check passed; horizontal table scroll is a known narrow-width behavior |
+| 2026-11-21 | Desktop build | N/A | N/A | Build/type check; no screenshot comparison | `npm run typecheck`, `npm run build`, `npm run veyra:secret:check` | Passed; Vite reports the existing >500kB renderer chunk warning |
 
 ## Required loop per milestone
 

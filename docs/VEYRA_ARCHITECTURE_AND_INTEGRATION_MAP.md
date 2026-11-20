@@ -42,3 +42,12 @@ The detailed manifest-to-route/screen mapping is in `VEYRA_DESIGN_COVERAGE_MATRI
 ## Unverified details
 
 This first pass did not yet inspect every controller, route handler, migration, IPC channel or page's data calls. Follow the existing endpoint/type consumer before modifying a feature and update this document with concrete file paths and contract behavior.
+
+## Desktop renderer details verified in continuation
+
+- The production renderer entry is `client/src/main.tsx` → `client/src/app/App.tsx` / `client/src/app/router.tsx`; the separate root `src/App.tsx` is not the production entry. The app is Electron + Vite + React Router, with the Electron main/preload boundary for privileged operations.
+- Main routes include `/`, `/preparation`, `/interview/setup`, `/practice`, `/live`, `/documents`, `/profile`, `/profile/experience`, `/profile/skills`, `/projects`, `/stories`, `/history`, `/history/:sessionId`, `/assessments`, `/analytics`, `/settings`, `/ai-setup`, `/account`, and `/overlay`. `analytics` currently maps to the Assessments screen and should be treated as an existing route behavior until reviewed.
+- `client/src/pages/Dashboard/Dashboard.tsx` reads recent sessions through `window.veyra.practice.listSessions`, provider state through `window.veyra.providers.getStatus`, and hardware assessment through `window.veyra.hardware.getAssessment`. Renderer must remain free of raw provider credentials; provider settings writes/verification stay in main-process IPC and OS-backed storage.
+- `client/src/components/layout/Sidebar.tsx`, `Header.tsx`, `AppShell.tsx` and `client/src/styles/globals.css` form the current renderer shell/theme. User-authored mobile navigation and active sidebar styling were preserved during the dashboard milestone.
+- `vite.config.ts` now explicitly uses the existing `client/public` asset directory. Without this setting, the development server returned `index.html` for `/favicon.svg`; the sidebar mark request therefore had `naturalWidth === 0`. Vite `base: "./"` is retained for packaged relative asset resolution.
+- Browser renderer QA used IPC stubs. It does not verify a real Electron session, operating-system permission prompt, provider health, hardware scan, or persisted practice session against the production runtime.

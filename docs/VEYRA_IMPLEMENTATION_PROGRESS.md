@@ -1,55 +1,50 @@
 # VEYRA implementation progress
 
-Updated: 2026-11-20 (Africa/Johannesburg)
+Updated: 2026-11-21 (Africa/Johannesburg)
 
 ## Current position
 
-- Verified the four supplied directories exist.
-- Website: `main`, `origin/main`, clean before this task, HEAD `cdee0fb` (`feat(website): Add currency conversion to pricing page`).
-- Desktop: `feat/veyra-phases-12-22`, tracks matching origin branch, HEAD `19a986b` (`feat(desktop): Complete phases 12-22 implementation`). `git status` was read with a command-scoped safe-directory exception; no repository config was changed.
-- Platform: `phase-2/supabase-foundation`, tracks matching origin branch, HEAD `2d60eca` (`feat: Complete exchange rate integration with SDK, tests, and type fixes`).
-- Desktop and platform are outside the writable root. Their files have only been inspected read-only.
-- Design manifest has exactly 119 screen entries. Registry groups them into 19 sections across marketing, auth, billing, portal, legal/support, installer, onboarding, hardware/AI, BYOK, desktop app, copilot, practice, reports, admin, responsive, and handoff.
-- The package says frames are generated purpose-built samples and were not visually reviewed in Figma. Per-screen written specifications are explicitly unfinished (W-08). Several commercial, provider, model, legal and sample-data values are placeholders.
-- Website already has Next.js 15 App Router, Supabase auth, a platform SDK/client, public pages, dashboard, and admin routes. Do not rebuild these systems.
-- Website design tokens are aligned in `src/app/globals.css` and `tailwind.config.js`: exact source palette, spacing/radius, semantic typography aliases, and documented transition durations are available without changing existing Tailwind utilities.
-- The website light/dark semantic palette now uses the exact values supplied in `00_core.js`. Shared Header uses the 68px height, 48px desktop/20px mobile horizontal inset, white light surface and 22px navigation spacing from `30_shells.js`; shared Button maps its default, secondary and danger variants to the reference dimensions/tokens.
-- The website pricing page had an extra closing `</section>` that prevented parsing; it has been removed. A nullable exchange-rate label was made null-safe.
-- The website platform client contained duplicate `listPricingCountries` and `getPlanPricing` class methods. The later identical declarations were removed; the existing canonical methods and endpoint constants remain.
+- Workspace paths verified: `Veyra`, `veyra-website`, `veyra-platform`, and `VEYRA-DESIGN-SPECS` all exist. The expected nested `VEYRA-FIGMA-PRODUCTION-GENERATOR` directory does not; the source package is directly in `VEYRA-DESIGN-SPECS`.
+- Website: branch `feat/veyra-design-foundation`; HEAD `eb96188` before this docs milestone. Existing user change preserved in `docs/ECOSYSTEM_BASELINE_AUDIT.md`.
+- Desktop: branch `feat/veyra-phases-12-22`; implementation milestone `61d2cf8` (`feat(desktop): align overview with VEYRA design`) pushed to the existing matching origin branch. Existing user changes in `package.json`, `docs/CREDENTIAL_ROTATION_GUIDANCE.md`, and `scripts/check-secrets.js` remain unstaged and preserved. The existing primary token `#6b4fe0` was retained because it matches the reference brand color.
+- Platform: branch `phase-2/supabase-foundation`; HEAD `2d60eca`, clean at last inspection.
+- Design source reports 119 generated manifest screens across 17 pages and 19 sections, 84 distinct screen-builder bodies, 30 Live Copilot overlay states, 21 component families and 57 variants. The 119 count includes state variants and is not evidence that all product requirements are designed.
+- The source package says frames were never visually reviewed in Figma, per-screen written specifications (W-08) are unfinished, and multiple marketing, legal, authentication, billing, portal, install, onboarding, provider/model, desktop settings, practice and admin states have no frames. Prototype/sample commercial, provider, model, legal and candidate data must not be used as production truth.
+- Website remains Next.js 15 App Router with Supabase auth and existing Platform clients/actions. Desktop is Electron main/preload plus Vite/React renderer, shared contracts and local services. Platform is the authoritative Fastify API/SDK/contracts and Supabase persistence layer. Preserve these boundaries.
 
-## Completed this execution
+## Completed in prior milestone
 
-- Verified workspace paths and inspected Git branch/remotes/latest commits for all three repos.
-- Read the handoff, design system, screen inventory, architecture, prototype flows and progress documentation.
-- Inspected core token/font/primitives and shared component builders, plus the website, portal, onboarding, desktop, admin, registry and overlay builder families. Further line-by-line dependency tracing remains.
-- Confirmed the manifest count and inspected the existing website route tree and desktop/platform source inventories.
-- Added the website CSS/Tailwind reference token layer.
-- Fixed the pricing page JSX close-tag defect, null-safe exchange-rate read, and duplicate client methods encountered during verification.
-- `npm run typecheck` passes.
-- `npm run build` passes: optimized compilation, lint/type validation, and 42 static pages generated.
-- Added the plan, architecture map, design map and screen coverage map.
+- Website exact palette/spacing/radius token layer, semantic Tailwind values, Header and Button alignment; fixed pricing JSX and nullable exchange-rate defects and duplicate platform client methods.
+- Website `npm run typecheck` and `npm run build` passed (42 static pages at that milestone).
+- Master plan, architecture map, 119-entry coverage matrix, human/machine design-reference maps, visual QA report and Figma handoff created.
 
-## Incomplete work / next actions
+## Completed in this continuation
 
-1. Finish tracing every builder, screen registration, SVG icon and prototype connection; enrich the coverage map with confirmed per-screen component/status details.
-2. Read the actual website API client, auth, pricing/download/dashboard/admin consumers and corresponding platform contracts/services before changing page behavior.
-3. Review current CSS variable usage and bring website public-page styling into line without changing functional behavior.
-4. Choose a high-priority website screen supported by exact reference details; implement and connect it to existing data/services.
-5. Capture actual desktop/mobile screenshots with an available browser workflow and compare them before marking visual QA complete. This execution had no installed browser or Playwright package.
-6. Continue desktop/platform UI work only in a later execution with their repositories authorized as writable.
+- Rechecked the three repository states and preserved all pre-existing user changes.
+- Compared desktop app shell and overview source with the existing renderer. Updated desktop theme tokens to the exact source palette, spacing/radius aliases, sidebar width (236px), active navigation colors, and top bar height (56px); removed app-level gradients not present in the reference shell.
+- Reworked the desktop overview to the source hierarchy (status row, Live Copilot and Practice Studio panels, recent sessions table), using existing provider, hardware assessment and practice IPC. Added explicit loading, empty and unavailable states; navigation uses existing routes and capture remains user initiated.
+- Fixed a verified packaging/preview defect: Vite had no `publicDir` configured despite assets being kept under `client/public`, so requests returned the SPA HTML fallback. Configured the existing asset directory, added a simplified exact-brand derivative mark for the sidebar, and aligned browser theme color metadata.
+- Captured and inspected implementation screenshots at 1280x900 and 390x900. Confirmed actual IPC control flow using explicit browser stubs, no page errors, image natural width 157 after public-directory correction, and Start Live Copilot navigates to `/live`. These are renderer checks with stubbed IPC, not real hardware/backend verification.
+- Desktop `npm run typecheck`, `npm run build`, and user-added `npm run veyra:secret:check` passed. Vite emitted the existing >500kB chunk warning; build completed successfully.
 
-## Verification and Git
+## Next actions
 
-- `npm run typecheck` — passed.
-- `npm run build` — passed after token, Header and Button updates; optimized compile, type/lint check and 42 pages generated.
-- `git diff --check` — passed during final review.
-- No screenshots captured; no visual comparison claimed.
-- Website milestone committed locally on `feat/veyra-design-foundation`: `5b8d3db` (`feat(website): align design foundation and map coverage`). Not pushed; full implementation remains incomplete and no screenshot comparison has been performed.
-- Desktop/platform Git status was readable using `git -c safe.directory=<repo>`; this did not modify global or repository configuration.
+1. Continue the design gap audit and add missing-requirement rows to the coverage matrix; distinguish generated designs from proposed extensions.
+2. Continue implementing/connecting desktop candidate context, documents, Live Copilot, Practice Studio and settings against existing IPC, with a screen-group screenshot and interaction loop per milestone.
+3. Continue website route-by-route design alignment, starting with marketing and downloads; preserve platform-sourced release, billing and entitlement data.
+4. Map platform admin UI calls to server-side authorization and service contracts before changing privileged operations.
+5. Resolve narrow-screen detail/table behavior from the actual design patterns and capture relevant responsive states.
+6. Update the visual QA and implementation handoff after each milestone. A source-builder comparison or implementation screenshot must not be described as a rendered Figma comparison.
+7. Review diffs and commit only explicit task-owned files after final checks. Do not include the existing user changes listed above. Do not push unless branch/remote state is rechecked and the reviewed milestone is safe to publish.
 
-## Known blockers / limits
+## Screenshot evidence
 
-- The execution workspace permits writes only in `C:\Users\MATTHEW\Desktop\veyra-website`. Desktop and platform code cannot be changed here.
-- The design package's own verification note says real Figma visual review has not occurred; source documentation and builder code remain the authoritative supplied reference.
-- The website declares Inter as its first font family, but no bundled Inter font asset or `@font-face` was found in the production repository. The browser will use Inter only when installed, then follow the declared system fallback; loading a web font remains an implementation decision.
-- The design's commercial/legal/provider placeholders require authoritative production configuration or product/legal decisions.
+- Desktop overview 1280x900: `C:\tmp\veyra-ui-baseline\dashboard-desktop-final.png`
+- Desktop overview at 390px viewport (full-page capture): `C:\tmp\veyra-ui-baseline\dashboard-mobile-final.png`
+- Earlier onboarding baseline: `C:\tmp\veyra-ui-baseline\onboarding-desktop.png` (not yet compared in this continuation)
+
+## Known limits
+
+- No real Figma frame render was available or inspected; the design generator reports that no frame has yet been reviewed in Figma. This milestone was checked against source builder structure and exact source tokens, plus actual app screenshots.
+- Renderer QA used stubbed IPC and does not establish production provider readiness, OS permission state, network connectivity or persisted session correctness.
+- Website/platform functional integration and the remaining desktop screens are not complete. No release readiness claim is made.
