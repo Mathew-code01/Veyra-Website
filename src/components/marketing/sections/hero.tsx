@@ -1,10 +1,6 @@
-'use client';
-
-import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {
-  ArrowDownRight,
   ArrowRight,
   AudioLines,
   BookOpenCheck,
@@ -21,7 +17,6 @@ import {
   Sparkles,
   Waves,
 } from 'lucide-react';
-import { gsap } from 'gsap';
 
 const workspaceItems = [
   { label: 'Overview', icon: PanelsTopLeft },
@@ -31,69 +26,50 @@ const workspaceItems = [
 ];
 
 export function HeroSection() {
-  const headlineRef = useRef<HTMLHeadingElement>(null);
-  const subheadRef = useRef<HTMLParagraphElement>(null);
-  const ctaRef = useRef<HTMLDivElement>(null);
-  const visualRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const media = gsap.matchMedia();
-    media.add('(prefers-reduced-motion: no-preference)', () => {
-      const timeline = gsap.timeline();
-      timeline
-        .from(headlineRef.current, { y: 22, opacity: 0, duration: 0.55, ease: 'power3.out' })
-        .from(subheadRef.current, { y: 14, opacity: 0, duration: 0.45, ease: 'power3.out' }, '-=0.2')
-        .from(ctaRef.current, { y: 12, opacity: 0, duration: 0.4, ease: 'power3.out' }, '-=0.16')
-        .from(visualRef.current, { y: 18, opacity: 0, duration: 0.65, ease: 'power3.out' }, '-=0.25');
-      return () => timeline.kill();
-    });
-    return () => media.revert();
-  }, []);
-
   return (
-    <section className="relative isolate overflow-hidden bg-[radial-gradient(ellipse_at_78%_42%,rgba(111,91,255,0.12),transparent_36%),linear-gradient(180deg,#fff_0%,#fafaff_72%,#fff_100%)] pt-12 pb-20 sm:pt-16 lg:pt-24 lg:pb-28">
-      <div aria-hidden="true" className="pointer-events-none absolute -left-40 top-36 h-80 w-80 rounded-full bg-indigo-200/25 blur-3xl" />
-      <div aria-hidden="true" className="pointer-events-none absolute -right-24 top-14 h-[30rem] w-[30rem] rounded-full bg-violet-200/30 blur-3xl" />
-
-      <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-[0.82fr_1.18fr] lg:gap-14 lg:px-8">
-        <div className="order-2 lg:order-1">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-200/80 bg-white/80 px-3.5 py-2 text-xs font-semibold tracking-wide text-indigo-800 shadow-sm shadow-indigo-950/5">
-            <span className="h-2 w-2 rounded-full bg-indigo-600" />
-            A desktop copilot for the moments that matter
+    <section className="bg-white py-8 min-[700px]:py-[72px]">
+      <div className="mx-auto max-w-[1440px] px-5 min-[700px]:px-16">
+        <div className="mx-auto grid max-w-[1312px] items-center gap-7 min-[700px]:gap-14 min-[1100px]:grid-cols-[minmax(0,600px)_minmax(0,640px)]">
+          <div className="min-w-0">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#D6CBFF] bg-[#F5F2FF] px-3.5 py-2 text-xs font-semibold text-[#5638C4]">
+            <span className="h-2 w-2 rounded-full bg-primary" />
+            Privacy-first desktop interview copilot
           </div>
-          <h1 ref={headlineRef} className="max-w-[13ch] text-balance text-4xl font-semibold leading-[1.06] tracking-[-0.045em] text-slate-950 sm:text-5xl lg:text-[3.65rem] xl:text-[4.1rem]">
-            Walk into your next interview <span className="bg-gradient-to-r from-indigo-700 via-indigo-600 to-violet-600 bg-clip-text text-transparent">better prepared.</span>
+          <h1 className="max-w-[600px] text-balance text-[32px] font-bold leading-10 text-[#0F1B3D] min-[700px]:text-[54px] min-[700px]:leading-[60px]">
+            Walk into every interview prepared — and supported.
           </h1>
-          <p ref={subheadRef} className="mt-6 max-w-xl text-base leading-7 text-slate-600 sm:text-lg sm:leading-8">
-            Practice with realistic interviews, shape answers around your own experience, and keep optional desktop guidance close when you need it.
+          <p className="mt-5 max-w-[560px] text-[15px] leading-[26px] text-[#3B4766] min-[700px]:text-[17px]">
+            VEYRA listens only when you say so, knows your CV and the role, and suggests concise, evidence-backed answers in a light overlay that floats above your interview.
           </p>
 
-          <div ref={ctaRef} className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <Link href="/register">
-              <Button size="lg" className="h-12 w-full rounded-xl bg-indigo-700 px-6 font-semibold shadow-lg shadow-indigo-900/15 transition duration-200 hover:-translate-y-0.5 hover:bg-indigo-800 sm:w-auto">
-                Create your account <ArrowRight className="ml-2 h-4 w-4" />
+          <div className="mt-6 flex flex-col gap-3 min-[700px]:flex-row min-[700px]:items-center">
+            <Link href="/download">
+              <Button size="lg" className="h-11 w-full rounded-[10px] px-5 font-semibold min-[700px]:w-auto">
+                Download VEYRA <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
             <Link href="/how-it-works">
-              <Button variant="outline" size="lg" className="h-12 w-full rounded-xl border-slate-300 bg-white/75 px-5 font-semibold text-slate-800 transition duration-200 hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-white sm:w-auto">
-                See how VEYRA works <ArrowDownRight className="ml-2 h-4 w-4" />
+              <Button variant="outline" size="lg" className="h-11 w-full rounded-[10px] px-5 font-semibold min-[700px]:w-auto">
+                See how it works <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
           </div>
 
-          <div className="mt-8 flex max-w-xl items-start gap-3 border-t border-slate-200/80 pt-5 text-sm leading-6 text-slate-500">
-            <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0 text-indigo-700" />
-            <p>Local inference is available for supported models. Cloud processing depends on the provider and the settings you choose.</p>
+          <div className="mt-6 flex flex-col gap-2.5 text-[13px] text-[#3B4766] min-[700px]:flex-row min-[700px]:flex-wrap min-[700px]:gap-x-5">
+            {[
+              { icon: Mic2, label: 'You control capture' },
+              { icon: LockKeyhole, label: 'Evidence stays labelled' },
+              { icon: Gauge, label: 'Cloud, BYOK or local' },
+            ].map(({ icon: Icon, label }) => <span key={label} className="inline-flex items-center gap-2"><Icon aria-hidden="true" className="h-4 w-4 text-primary" />{label}</span>)}
           </div>
-          <p className="mt-3 max-w-xl text-xs leading-5 text-slate-500">
-            This Website previews the workflow. Microphone, screen context and local inference run in VEYRA Desktop and require the relevant permissions.
+          <p className="mt-4 max-w-[560px] text-xs leading-5 text-[#6B7694]">
+            This website previews the workflow. Microphone and screen context are available in VEYRA Desktop and require your permission and an explicit start.
           </p>
-        </div>
+          </div>
 
-        <div ref={visualRef} className="order-1 min-w-0 lg:order-2">
-          <div className="relative mx-auto max-w-[720px] pb-5 sm:pb-8">
-            <div aria-hidden="true" className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-indigo-300/45 via-violet-200/30 to-sky-200/30 blur-2xl" />
-            <div className="relative overflow-hidden rounded-[1.5rem] border border-white/90 bg-white shadow-[0_32px_100px_-42px_rgba(37,33,91,0.45)] ring-1 ring-indigo-950/[0.07]">
+        <div className="min-w-0">
+          <div className="relative mx-auto h-[300px] max-w-[640px] min-[700px]:h-[430px]">
+            <div aria-hidden="true" className="absolute inset-0 overflow-hidden rounded-2xl border border-border bg-white shadow-[0_8px_24px_rgba(15,27,61,0.12)]">
               <div className="flex h-12 items-center justify-between border-b border-slate-200/80 bg-white/90 px-4 sm:px-5">
                 <div className="flex items-center gap-2" aria-hidden="true">
                   <span className="h-2.5 w-2.5 rounded-full bg-slate-300" />
@@ -107,7 +83,7 @@ export function HeroSection() {
                 <div className="hidden h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-[10px] font-semibold text-slate-500 sm:flex">V</div>
               </div>
 
-              <div className="grid min-h-[340px] sm:min-h-[385px] sm:grid-cols-[142px_minmax(0,1fr)]">
+              <div className="grid h-[calc(100%-48px)] min-h-0 sm:grid-cols-[142px_minmax(0,1fr)]">
                 <aside className="hidden border-r border-slate-200/80 bg-[#fafaff] p-3 sm:block">
                   <div className="mb-6 flex items-center gap-2 px-2 pt-1">
                     <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-700 text-white shadow-sm shadow-indigo-900/20"><Sparkles className="h-4 w-4" /></span>
@@ -175,21 +151,22 @@ export function HeroSection() {
               </div>
             </div>
 
-            <div className="relative mt-3 rounded-2xl border border-white/80 bg-slate-950/[0.94] p-4 text-white shadow-[0_22px_60px_-30px_rgba(20,18,55,0.8)] ring-1 ring-slate-950/10 sm:absolute sm:-bottom-3 sm:right-5 sm:mt-0 sm:w-[270px] sm:p-4">
+            <div className="absolute left-4 right-4 top-14 rounded-xl border border-[#E4E7F0] bg-white/95 p-3 text-[#0F1B3D] shadow-[0_8px_24px_rgba(15,27,61,0.16)] sm:left-auto sm:right-5 sm:top-16 sm:w-[320px] sm:p-4">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/10 text-violet-200"><Sparkles className="h-4 w-4" /></span>
-                  <div><p className="text-[11px] font-semibold">Desktop copilot</p><p className="mt-0.5 text-[9px] text-slate-400">Illustrative overlay · idle</p></div>
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F5F2FF] text-[#5638C4]"><Sparkles className="h-4 w-4" /></span>
+                  <div><p className="text-[11px] font-semibold">Live Copilot</p><p className="mt-0.5 text-[9px] text-[#6B7694]">Illustrative · response ready</p></div>
                 </div>
-                <span className="rounded-full border border-white/10 bg-white/5 px-2 py-1 text-[9px] text-slate-300">Capture off</span>
+                <span className="rounded-full border border-[#E4E7F0] bg-[#F7F8FC] px-2 py-1 text-[9px] text-[#3B4766]">Capture off</span>
               </div>
-              <div className="mt-3 flex items-start gap-2.5 rounded-xl border border-white/10 bg-white/[0.06] p-3">
-                <LockKeyhole className="mt-0.5 h-3.5 w-3.5 shrink-0 text-violet-200" />
-                <p className="text-[9px] leading-4 text-slate-300">Start listening only when you choose. Permission and session state stay visible.</p>
+              <div className="mt-3 flex items-start gap-2.5 rounded-lg border border-[#E4E7F0] bg-[#F7F8FC] p-3">
+                <LockKeyhole className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#5638C4]" />
+                <p className="text-[10px] leading-4 text-[#3B4766]">Capture begins only when you choose. Evidence remains visibly labelled in the app.</p>
               </div>
             </div>
           </div>
         </div>
+      </div>
       </div>
     </section>
   );

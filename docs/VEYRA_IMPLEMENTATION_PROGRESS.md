@@ -26,6 +26,8 @@ Updated: 2026-11-21 (Africa/Johannesburg)
 - Fixed a verified packaging/preview defect: Vite had no `publicDir` configured despite assets being kept under `client/public`, so requests returned the SPA HTML fallback. Configured the existing asset directory, added a simplified exact-brand derivative mark for the sidebar, and aligned browser theme color metadata.
 - Captured and inspected implementation screenshots at 1280x900 and 390x900. Confirmed actual IPC control flow using explicit browser stubs, no page errors, image natural width 157 after public-directory correction, and Start Live Copilot navigates to `/live`. These are renderer checks with stubbed IPC, not real hardware/backend verification.
 - Desktop `npm run typecheck`, `npm run build`, and user-added `npm run veyra:secret:check` passed. Vite emitted the existing >500kB chunk warning; build completed successfully.
+- Began website marketing phase 06 with the homepage hero. It now follows the `homePage` builder's copy, layout hierarchy, 54px/60px desktop type, 32px/40px narrow type, exact brand palette, CTA destinations and light Live Copilot overlay preview. Removed hero-only GSAP animation and converted the section file to server-renderable components.
+- Website `npm run typecheck` and `npm run build` passed after the hero changes; Next generated 42 pages. Captured and inspected production renders at 1440px and 390px, with no browser page errors. The hero download link resolves to `/download`; 834px and the lower homepage sections still need visual review.
 
 ## Next actions
 
@@ -41,6 +43,8 @@ Updated: 2026-11-21 (Africa/Johannesburg)
 
 - Desktop overview 1280x900: `C:\tmp\veyra-ui-baseline\dashboard-desktop-final.png`
 - Desktop overview at 390px viewport (full-page capture): `C:\tmp\veyra-ui-baseline\dashboard-mobile-final.png`
+- Website homepage at 1440px viewport (full-page capture): `C:\tmp\veyra-ui-baseline\website-home-1440-final.png`
+- Website homepage at 390px viewport (full-page capture): `C:\tmp\veyra-ui-baseline\website-home-390-final.png`
 - Earlier onboarding baseline: `C:\tmp\veyra-ui-baseline\onboarding-desktop.png` (not yet compared in this continuation)
 
 ## Known limits
