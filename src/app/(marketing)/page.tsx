@@ -9,11 +9,11 @@ export default function HomePage() {
       <Header />
       <main>
         <HeroSection />
+        <HowItWorksSection />
         <CapabilitiesSection />
         <PracticeSection />
         <LiveCopilotSection />
         <DesktopExplanationSection />
-        <HowItWorksSection />
         <BenefitsSection />
         <TrustSection />
         <PricingPreviewSection />

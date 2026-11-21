@@ -28,6 +28,8 @@ Updated: 2026-11-21 (Africa/Johannesburg)
 - Desktop `npm run typecheck`, `npm run build`, and user-added `npm run veyra:secret:check` passed. Vite emitted the existing >500kB chunk warning; build completed successfully.
 - Began website marketing phase 06 with the homepage hero. It now follows the `homePage` builder's copy, layout hierarchy, 54px/60px desktop type, 32px/40px narrow type, exact brand palette, CTA destinations and light Live Copilot overlay preview. Removed hero-only GSAP animation and converted the section file to server-renderable components.
 - Website `npm run typecheck` and `npm run build` passed after the hero changes; Next generated 42 pages. Captured and inspected production renders at 1440px and 390px, with no browser page errors. The hero download link resolves to `/download`; 834px and the lower homepage sections still need visual review.
+- Aligned the homepage “How it works” section with the source `homePage` builder: four steps, matching copy and icon family, source spacing, and desktop four-column/narrow stacked layout. Removed the client-only viewport reveal animation, which left this content hidden in static full-page captures, and moved the section directly after the hero. The resulting homepage route is again server-renderable for this section.
+- Website production build passed after both homepage changes and generated all 42 routes. Verified the four step headings at 1440px and 390px; no browser page errors occurred.
 
 ## Next actions
 
@@ -45,6 +47,8 @@ Updated: 2026-11-21 (Africa/Johannesburg)
 - Desktop overview at 390px viewport (full-page capture): `C:\tmp\veyra-ui-baseline\dashboard-mobile-final.png`
 - Website homepage at 1440px viewport (full-page capture): `C:\tmp\veyra-ui-baseline\website-home-1440-final.png`
 - Website homepage at 390px viewport (full-page capture): `C:\tmp\veyra-ui-baseline\website-home-390-final.png`
+- Website “How it works” at 1440px viewport: `C:\tmp\veyra-ui-baseline\website-howitworks-desktop-viewport.png`
+- Website “How it works” at 390px viewport: `C:\tmp\veyra-ui-baseline\website-howitworks-mobile-viewport.png`
 - Earlier onboarding baseline: `C:\tmp\veyra-ui-baseline\onboarding-desktop.png` (not yet compared in this continuation)
 
 ## Known limits
