@@ -1,0 +1,148 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0E1326"/>
+      <stop offset="60%" stop-color="#182044"/>
+      <stop offset="100%" stop-color="#241B4B"/>
+    </linearGradient>
+    <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8E72FF"/>
+      <stop offset="100%" stop-color="#6B4FE0"/>
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#F8F9FD"/>
+    </linearGradient>
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#000000" flood-opacity="0.38"/>
+    </filter>
+  </defs>
+
+  <!-- Canvas Background -->
+  <rect width="1200" height="630" fill="url(#bgGrad)"/>
+
+  <!-- Atmospheric Glow Circles -->
+  <circle cx="1050" cy="120" r="340" fill="#6B4FE0" opacity="0.22" filter="blur(80px)"/>
+  <circle cx="200" cy="580" r="280" fill="#4338CA" opacity="0.18" filter="blur(70px)"/>
+
+  <!-- Subtle Grid Lines -->
+  <g stroke="#FFFFFF" stroke-opacity="0.04" stroke-width="1">
+    <line x1="0" y1="126" x2="1200" y2="126"/>
+    <line x1="0" y1="252" x2="1200" y2="252"/>
+    <line x1="0" y1="378" x2="1200" y2="378"/>
+    <line x1="0" y1="504" x2="1200" y2="504"/>
+    <line x1="240" y1="0" x2="240" y2="630"/>
+    <line x1="480" y1="0" x2="480" y2="630"/>
+    <line x1="720" y1="0" x2="720" y2="630"/>
+    <line x1="960" y1="0" x2="960" y2="630"/>
+  </g>
+
+  <!-- Brand Lockup (Top Left) -->
+  <g transform="translate(80, 72)">
+    <!-- App Icon Mark -->
+    <rect width="52" height="52" rx="14" fill="#6B4FE0"/>
+    <path d="M 14.08 15.17 L 26 37.92 L 37.92 15.17" stroke="#FFFFFF" stroke-width="5.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <circle cx="26" cy="13" r="3.25" fill="#FFFFFF" opacity="0.6"/>
+
+    <!-- Wordmark -->
+    <text x="68" y="37" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="28" font-weight="800" fill="#FFFFFF" letter-spacing="3.5">VEYRA</text>
+  </g>
+
+  <!-- Left Content Column -->
+  <g transform="translate(80, 175)">
+    <!-- Category Pill -->
+    <rect width="270" height="32" rx="16" fill="#6B4FE0" fill-opacity="0.22" stroke="#8E72FF" stroke-width="1" stroke-opacity="0.45"/>
+    <text x="16" y="21" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="700" fill="#D3C9FF" letter-spacing="1.4">DESKTOP AI INTERVIEW COPILOT</text>
+
+    <!-- Main Headline -->
+    <text x="0" y="86" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="46" font-weight="800" fill="#FFFFFF" letter-spacing="-0.8">Private, context-aware</text>
+    <text x="0" y="142" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="46" font-weight="800" fill="#C3B4FF" letter-spacing="-0.8">interview guidance.</text>
+
+    <!-- Value Proposition -->
+    <text x="0" y="196" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="400" fill="#B3B9D1" width="520">
+      <tspan x="0" dy="0">Live question detection, STAR story suggestions, and structured</tspan>
+      <tspan x="0" dy="26">practice. Cloud-only, BYOK, or private local-only execution.</tspan>
+    </text>
+
+    <!-- Feature Pills -->
+    <g transform="translate(0, 268)">
+      <rect width="180" height="34" rx="8" fill="#FFFFFF" fill-opacity="0.08" stroke="#FFFFFF" stroke-opacity="0.14"/>
+      <text x="14" y="22" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#E2E5EF">✓ Privacy-first</text>
+
+      <g transform="translate(192, 0)">
+        <rect width="186" height="34" rx="8" fill="#FFFFFF" fill-opacity="0.08" stroke="#FFFFFF" stroke-opacity="0.14"/>
+        <text x="14" y="22" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#E2E5EF">✓ Live Copilot Overlay</text>
+      </g>
+
+      <g transform="translate(390, 0)">
+        <rect width="154" height="34" rx="8" fill="#FFFFFF" fill-opacity="0.08" stroke="#FFFFFF" stroke-opacity="0.14"/>
+        <text x="14" y="22" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#E2E5EF">✓ Practice Studio</text>
+      </g>
+    </g>
+
+    <!-- Supported Platforms -->
+    <text x="0" y="348" font-family="system-ui, sans-serif" font-size="13" font-weight="500" fill="#8891A9">
+      Available for Windows · macOS · Linux
+    </text>
+  </g>
+
+  <!-- Right Visual Mockup: Live Copilot Card -->
+  <g transform="translate(680, 110)" filter="url(#cardShadow)">
+    <!-- Container Card -->
+    <rect width="440" height="420" rx="20" fill="url(#cardGrad)" stroke="#E2E5EF" stroke-width="1.5"/>
+
+    <!-- Header bar -->
+    <rect width="440" height="52" rx="20 20 0 0" fill="#FFFFFF"/>
+    <line x1="0" y1="52" x2="440" y2="52" stroke="#E2E5EF" stroke-width="1"/>
+
+    <circle cx="28" cy="26" r="5" fill="#16A34A"/>
+    <text x="42" y="30" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#182044">Live Copilot</text>
+    <rect x="134" y="16" width="92" height="20" rx="10" fill="#ECE9FB"/>
+    <text x="146" y="30" font-family="system-ui, sans-serif" font-size="10" font-weight="700" fill="#6B4FE0">MIC ACTIVE</text>
+
+    <text x="360" y="30" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#8891A9">82% OPACITY</text>
+
+    <!-- Detected Question Card -->
+    <g transform="translate(24, 76)">
+      <rect width="392" height="116" rx="12" fill="#ECE9FB" stroke="#D5CCFF" stroke-width="1"/>
+      <text x="16" y="28" font-family="system-ui, sans-serif" font-size="10" font-weight="800" fill="#6B4FE0" letter-spacing="1.2">QUESTION DETECTED</text>
+      <text x="16" y="56" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#182044">
+        &ldquo;Tell me about a high-stakes decision
+      </text>
+      <text x="16" y="78" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#182044">
+        where you had incomplete data.&rdquo;
+      </text>
+      <text x="16" y="100" font-family="system-ui, sans-serif" font-size="11" font-weight="500" fill="#5638C4">
+        Behavioural · Leadership · 1.1s latency
+      </text>
+    </g>
+
+    <!-- Suggested Answer / Evidence Card -->
+    <g transform="translate(24, 208)">
+      <rect width="392" height="136" rx="12" fill="#FFFFFF" stroke="#E2E5EF" stroke-width="1"/>
+      <text x="16" y="26" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#182044">STAR Story — Project Atlas Architecture</text>
+      
+      <text x="16" y="52" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#6B4FE0">Situation:</text>
+      <text x="74" y="52" font-family="system-ui, sans-serif" font-size="11" font-weight="400" fill="#4E5A7E">Legacy database degraded under 4x traffic peak.</text>
+
+      <text x="16" y="74" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#6B4FE0">Action:</text>
+      <text x="64" y="74" font-family="system-ui, sans-serif" font-size="11" font-weight="400" fill="#4E5A7E">Migrated read-replicas in 48 hours without outage.</text>
+
+      <text x="16" y="96" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#6B4FE0">Result:</text>
+      <text x="60" y="96" font-family="system-ui, sans-serif" font-size="11" font-weight="400" fill="#4E5A7E">Maintained 99.98% uptime; saved 34% query cost.</text>
+
+      <text x="16" y="122" font-family="system-ui, sans-serif" font-size="10" font-weight="500" fill="#8891A9">
+        Verified from CV.pdf (page 2) · Confirmed by candidate
+      </text>
+    </g>
+
+    <!-- Footer privacy status -->
+    <g transform="translate(24, 366)">
+      <rect width="392" height="34" rx="8" fill="#F4F5FA"/>
+      <circle cx="18" cy="17" r="4" fill="#6B4FE0"/>
+      <text x="30" y="21" font-family="system-ui, sans-serif" font-size="11" font-weight="500" fill="#4E5A7E">
+        Audio processed on-device · No silent background capture
+      </text>
+    </g>
+  </g>
+</svg>

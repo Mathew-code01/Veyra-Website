@@ -1,51 +1,76 @@
 import Link from 'next/link';
 import { VeyraLogo } from '@/components/marketing/logo';
 
+const FOOTER_GROUPS = [
+  {
+    title: 'Product',
+    links: [
+      { href: '/features', label: 'Features' },
+      { href: '/live-copilot', label: 'Live Copilot' },
+      { href: '/ai-configuration', label: 'AI configuration' },
+      { href: '/features#practice-studio', label: 'Practice Studio' },
+      { href: '/pricing', label: 'Pricing' },
+      { href: '/download', label: 'Download' },
+    ],
+  },
+  {
+    title: 'Resources',
+    links: [
+      { href: '/how-it-works', label: 'How it works' },
+      { href: '/features#use-cases', label: 'Use cases' },
+      { href: '/faq', label: 'FAQ' },
+    ],
+  },
+  {
+    title: 'Company',
+    links: [
+      { href: '/about', label: 'About' },
+      { href: '/contact', label: 'Contact and support' },
+    ],
+  },
+  {
+    title: 'Legal',
+    links: [
+      { href: '/terms', label: 'Terms of service' },
+      { href: '/privacy', label: 'Privacy policy' },
+    ],
+  },
+];
+
 export function Footer() {
   return (
     <footer className="border-t border-border bg-background">
-      <div className="max-w-7xl mx-auto px-4 py-12 lg:px-8 lg:py-16">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-12">
-          <div className="col-span-2 lg:col-span-1">
-            <div className="flex items-center gap-2 mb-4">
-              <VeyraLogo size="md" />
-              <span className="font-bold text-xl tracking-tight text-veyra-navy">VEYRA</span>
-            </div>
-            <p className="text-sm text-muted-foreground max-w-xs">
-              AI-powered interview assistance and practice. Secure, private, and built for candidates.
+      <div className="mx-auto max-w-[1440px] px-5 py-12 min-[700px]:px-12 min-[700px]:py-16">
+        <div className="grid grid-cols-2 gap-x-8 gap-y-10 min-[700px]:grid-cols-4 min-[1100px]:grid-cols-[minmax(240px,1.5fr)_repeat(4,minmax(120px,1fr))] min-[1100px]:gap-10">
+          <div className="col-span-2 min-[1100px]:col-span-1">
+            <Link href="/" aria-label="VEYRA home" className="mb-4 inline-flex items-center gap-2">
+              <VeyraLogo size="sm" />
+              <span className="text-xl font-bold tracking-tight text-veyra-navy">VEYRA</span>
+            </Link>
+            <p className="max-w-xs text-sm leading-6 text-muted-foreground">
+              Privacy-first interview preparation and optional Desktop guidance, with capture under your control.
             </p>
           </div>
-          <div>
-            <h4 className="text-sm font-semibold mb-4">Product</h4>
-            <ul className="space-y-3 text-sm text-muted-foreground">
-              <li><Link href="/features" className="hover:text-veyra-indigo">Features</Link></li>
-              <li><Link href="/how-it-works" className="hover:text-veyra-indigo">How it works</Link></li>
-              <li><Link href="/pricing" className="hover:text-veyra-indigo">Pricing</Link></li>
-              <li><Link href="/download" className="hover:text-veyra-indigo">Download</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="text-sm font-semibold mb-4">Company</h4>
-            <ul className="space-y-3 text-sm text-muted-foreground">
-              <li><Link href="/about" className="hover:text-veyra-indigo">About</Link></li>
-              <li><Link href="/contact" className="hover:text-veyra-indigo">Contact</Link></li>
-              <li><Link href="/faq" className="hover:text-veyra-indigo">FAQ</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="text-sm font-semibold mb-4">Legal</h4>
-            <ul className="space-y-3 text-sm text-muted-foreground">
-              <li><Link href="/privacy" className="hover:text-veyra-indigo">Privacy Policy</Link></li>
-              <li><Link href="/terms" className="hover:text-veyra-indigo">Terms of Service</Link></li>
-            </ul>
-          </div>
+
+          {FOOTER_GROUPS.map(({ title, links }) => (
+            <nav key={title} aria-label={`${title} links`}>
+              <h2 className="mb-4 text-sm font-semibold text-veyra-navy">{title}</h2>
+              <ul className="space-y-3 text-sm text-muted-foreground">
+                {links.map(({ href, label }) => (
+                  <li key={href}>
+                    <Link href={href} className="transition-colors hover:text-veyra-indigo focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                      {label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          ))}
         </div>
-        <div className="border-t border-border pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-muted-foreground">
-          <p>VEYRA. All rights reserved.</p>
-          <div className="flex items-center gap-6">
-            <Link href="/privacy" className="hover:text-foreground">Privacy</Link>
-            <Link href="/terms" className="hover:text-foreground">Terms</Link>
-          </div>
+
+        <div className="mt-12 flex flex-col gap-3 border-t border-border pt-6 text-xs text-muted-foreground min-[700px]:flex-row min-[700px]:items-center min-[700px]:justify-between">
+          <p>© VEYRA</p>
+          <p>Interview preparation and optional Desktop guidance.</p>
         </div>
       </div>
     </footer>

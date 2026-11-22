@@ -82,10 +82,39 @@ export function isRateLimited(err: VeyraApiError): boolean {
 }
 
 export function userFriendlyMessage(err: VeyraApiError): string {
-  // Never leak internal details. Map known codes to safe user messages.
+  // Never leak internal details, database messages, or server exceptions.
+  // Map known codes and messages to safe user messages.
+  const rawLower = (err.message || '').toLowerCase();
+
+  // Check for email enumeration or raw Supabase strings
+  if (
+    rawLower.includes('email not found') ||
+    rawLower.includes('invalid login credentials') ||
+    rawLower.includes('invalid email or password') ||
+    rawLower.includes('user not found')
+  ) {
+    return "We couldn't sign you in with those details. Check your information and try again.";
+  }
+
+  if (rawLower.includes('user already registered') || rawLower.includes('already exists')) {
+    return 'An account with this email address already exists. Try signing in instead.';
+  }
+
+  if (rawLower.includes('email not confirmed') || rawLower.includes('email_not_confirmed')) {
+    return 'Please confirm your email address before signing in. Check your inbox for the confirmation link.';
+  }
+
+  if (rawLower.includes('failed to fetch') || rawLower.includes('networkerror') || rawLower.includes('econnrefused')) {
+    return "We're having trouble connecting. Check your internet connection and try again.";
+  }
+
+  if (rawLower.includes('timed out') || rawLower.includes('timeout') || rawLower.includes('aborted')) {
+    return 'This is taking longer than expected. You can try again.';
+  }
+
   switch (err.code) {
     case 'NETWORK_ERROR':
-      return 'Unable to connect to the Veyra Platform. Please check your internet connection and try again.';
+      return 'Unable to connect. Check your internet connection and try again.';
     case 'VALIDATION_ERROR':
       return 'Please check the information you entered and try again.';
     case 'UNAUTHORIZED':
@@ -98,9 +127,19 @@ export function userFriendlyMessage(err: VeyraApiError): string {
     case 'RATE_LIMITED':
       return 'Too many requests. Please wait a moment and try again.';
     case 'LOGIN_FAILED':
-      return 'Invalid email or password. Please try again.';
+    case 'INVALID_CREDENTIALS':
+      return 'Invalid email or password. Check your information and try again.';
     case 'REGISTRATION_FAILED':
-      return 'Unable to create your account. Please try again.';
+      return 'Unable to create your account. Please check your information and try again.';
+    case 'USER_ALREADY_EXISTS':
+      return 'An account with this email address already exists. Try signing in instead.';
+    case 'EMAIL_NOT_CONFIRMED':
+      return 'Please confirm your email address before signing in. Check your inbox for the confirmation link.';
+    case 'TRANSACTION_EXPIRED':
+    case 'AUTH_EXPIRED':
+      return 'Your sign-in session expired before it was completed. Start again to continue.';
+    case 'AUTH_CANCELLED':
+      return "Sign-in wasn't completed. You can return to VEYRA and try again whenever you're ready.";
     case 'RESERVATION_FAILED':
     case 'SETTLEMENT_FAILED':
       return 'Unable to process your request. Please check your balance and try again.';
@@ -110,7 +149,7 @@ export function userFriendlyMessage(err: VeyraApiError): string {
       return 'Unable to authorize this download. Please try again.';
     case 'OAUTH_CALLBACK_ERROR':
     case 'OAUTH_AUTHORIZE_ERROR':
-      return 'Unable to complete sign-in with that provider. Please try again.';
+      return 'Unable to complete sign-in with that provider. Please try again or use email and password.';
     case 'PROVIDER_NOT_CONFIGURED':
       return 'That sign-in provider is not currently configured. Please use email/password instead.';
     case 'DEVICE_REGISTRATION_ERROR':
@@ -118,6 +157,11 @@ export function userFriendlyMessage(err: VeyraApiError): string {
     case 'DEVICE_REVOCATION_ERROR':
       return 'Unable to manage your device. Please try again.';
     default:
-      return err.message || 'An unexpected error occurred. Please try again.';
+      if (err.status >= 500) {
+        return 'VEYRA is temporarily unavailable. Please try again shortly.';
+      }
+      return err.message && !err.message.includes('Internal')
+        ? err.message
+        : 'An unexpected error occurred. Please try again.';
   }
 }

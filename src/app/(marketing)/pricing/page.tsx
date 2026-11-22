@@ -3,29 +3,26 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/components/auth/auth-provider';
 import { VeyraPlatformClient } from '@/services/platform/client';
-import { userFriendlyMessage, isAuthError } from '@/services/platform/errors';
+import { userFriendlyMessage, isAuthError, normalizeError } from '@/services/platform/errors';
 import { apiBaseUrl } from '@/lib/env';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui';
 import Link from 'next/link';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 
-function formatCurrency(amountCents: number, currency: string) {
+function formatCurrency(amount: number, currency: string) {
   const formatter = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
   });
-  return formatter.format(amountCents / 100);
+  return formatter.format(amount);
 }
 
 type PricingPlan = {
   planId: string;
   planName: string;
   planFamily: string;
+  description?: string;
   currency: string;
   amountCents: number;
   billingInterval: 'monthly' | 'yearly';
@@ -49,6 +46,7 @@ function isPricingPlan(value: unknown, currency: string): value is PricingPlan {
   const plan = value as Partial<PricingPlan>;
   return typeof plan.planId === 'string' && plan.planId.length > 0 &&
     typeof plan.planName === 'string' && typeof plan.planFamily === 'string' &&
+    (plan.description === undefined || typeof plan.description === 'string') &&
     (plan.currency === currency || plan.currency === 'USD') && Number.isSafeInteger(plan.amountCents) && plan.amountCents! > 0 &&
     (plan.billingInterval === 'monthly' || plan.billingInterval === 'yearly') &&
     typeof plan.isAvailable === 'boolean';
@@ -86,6 +84,7 @@ export default function PricingPage() {
   const [plans, setPlans] = useState<PricingPlan[]>([]);
   const [plansSource, setPlansSource] = useState<'live' | 'cache' | null>(null);
   const [cachedAt, setCachedAt] = useState<string | null>(null);
+  const [billingInterval, setBillingInterval] = useState<'monthly' | 'yearly'>('monthly');
   const [exchangeRate, setExchangeRate] = useState<{ rate: number; timestamp: string; isLive: boolean } | null>(null);
   const [exchangeRateError, setExchangeRateError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -134,7 +133,7 @@ export default function PricingPage() {
           }
         }
       } catch (err: any) {
-        setError(userFriendlyMessage(err));
+        setError(userFriendlyMessage(normalizeError(err)));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -179,10 +178,11 @@ export default function PricingPage() {
           }
         }
       } catch (err: any) {
-        if (!cancelled && !isAuthError(err)) {
+        const apiError = normalizeError(err, 'The Platform could not return valid prices for this region.');
+        if (!cancelled && !isAuthError(apiError)) {
           setError(cached
             ? 'The Platform is temporarily unavailable. Showing the last verified price; checkout is disabled until the current offer can be confirmed.'
-            : userFriendlyMessage(err));
+            : userFriendlyMessage(apiError));
         }
       } finally {
         if (!cancelled) setPlansLoading(false);
@@ -191,6 +191,12 @@ export default function PricingPage() {
     load();
     return () => { cancelled = true; };
   }, [client, detected]);
+
+  useEffect(() => {
+    if (!plans.some((plan) => plan.billingInterval === billingInterval) && plans[0]) {
+      setBillingInterval(plans[0].billingInterval);
+    }
+  }, [plans, billingInterval]);
 
   // Fetch exchange rate for the detected currency
   useEffect(() => {
@@ -213,7 +219,7 @@ export default function PricingPage() {
         });
       } catch (err: any) {
         // Exchange rate failure should not block pricing display
-        setExchangeRateError(err instanceof Error ? err.message : 'Failed to load exchange rate');
+        setExchangeRateError(userFriendlyMessage(normalizeError(err, 'Live currency conversion is unavailable.')));
       }
     };
     load();
@@ -244,20 +250,29 @@ export default function PricingPage() {
       });
       window.location.assign(result.checkoutUrl);
     } catch (err: any) {
-      setError(userFriendlyMessage(err));
+      setError(userFriendlyMessage(normalizeError(err, 'Unable to start checkout. Please try again.')));
       setCheckoutPlanId(null);
     }
   };
+
+  const visiblePlans = plans.filter((plan) => plan.billingInterval === billingInterval);
+  const hasForeignCurrencyPlans = visiblePlans.some((plan) => plan.currency !== detected?.currency);
 
   if (loading) {
     return (
       <div className="min-h-screen bg-background text-foreground">
         <Header />
-        <main className="max-w-3xl mx-auto px-4 lg:px-8 py-20">
-          <h1 className="text-display-md font-bold text-veyra-navy mb-6">Pricing</h1>
-          <div className="rounded-xl border border-border bg-card p-8 animate-pulse">
-            <div className="h-10 bg-secondary rounded w-1/3" />
-            <div className="h-8 bg-secondary rounded w-1/2 mt-4" />
+        <main className="mx-auto max-w-5xl px-5 py-16 lg:px-8">
+          <div role="status" className="rounded-2xl border border-border bg-white p-8">
+            <span className="sr-only">Loading regional pricing</span>
+            <div className="h-3 w-28 animate-pulse rounded bg-secondary" />
+            <div className="mt-4 h-9 w-2/3 animate-pulse rounded bg-secondary" />
+            <div className="mt-3 h-5 w-full max-w-xl animate-pulse rounded bg-secondary" />
+            <div className="mt-8 grid gap-4 md:grid-cols-3">
+              {[0, 1, 2].map((item) => (
+                <div key={item} className="h-56 animate-pulse rounded-xl border border-border bg-background" />
+              ))}
+            </div>
           </div>
         </main>
         <Footer />
@@ -269,40 +284,47 @@ export default function PricingPage() {
     <div className="min-h-screen bg-background text-foreground">
       <Header />
       <main>
-        <section className="py-16 border-b border-border">
-          <div className="max-w-3xl mx-auto px-4 lg:px-8 text-center">
-            <h1 className="text-display-md font-bold text-veyra-navy mb-6">Pricing</h1>
-            <p className="text-lg text-muted-foreground">
-              Plans and pricing are configured in the Veyra Platform and fetched live.
+        <section aria-labelledby="pricing-title" className="border-b border-border bg-white py-12 md:py-16">
+          <div className="mx-auto max-w-4xl px-5 text-center lg:px-8">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-veyra-indigo">Pricing</p>
+            <h1 id="pricing-title" className="mt-3 text-3xl font-bold tracking-tight text-veyra-navy md:text-4xl">
+              Simple plans. Honest limits.
+            </h1>
+            <p className="mx-auto mt-4 max-w-3xl text-base leading-7 text-muted-foreground md:text-lg">
+              Prices, offer details, and availability come from the VEYRA Platform. Only published offers appear below.
             </p>
+            <div className="mt-7 inline-flex rounded-xl border border-border bg-background p-1" role="group" aria-label="Billing interval">
+              {(['monthly', 'yearly'] as const).map((interval) => (
+                <button
+                  key={interval}
+                  type="button"
+                  aria-pressed={billingInterval === interval}
+                  onClick={() => setBillingInterval(interval)}
+                  className={`min-h-10 rounded-lg px-5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                    billingInterval === interval
+                      ? 'bg-white text-veyra-navy shadow-sm'
+                      : 'text-muted-foreground hover:text-veyra-navy'
+                  }`}
+                >
+                  {interval === 'monthly' ? 'Monthly' : 'Annual'}
+                </button>
+              ))}
+            </div>
           </div>
         </section>
 
-        <section className="border-b border-border bg-indigo-50/60 py-10">
-          <div className="mx-auto grid max-w-5xl gap-4 px-4 md:grid-cols-3 lg:px-8">
-            <div className="rounded-xl border border-indigo-100 bg-white p-5">
-              <h2 className="font-semibold text-veyra-navy">Managed Cloud AI</h2>
-              <p className="mt-2 text-sm text-muted-foreground">A VEYRA Cloud subscription appears here only when an approved regional plan and price are published.</p>
-            </div>
-            <div className="rounded-xl border border-border bg-white p-5">
-              <h2 className="font-semibold text-veyra-navy">Bring your own provider</h2>
-              <p className="mt-2 text-sm text-muted-foreground">Connect a supported provider in Desktop. Provider usage is billed by that provider under its own account and terms.</p>
-            </div>
-            <div className="rounded-xl border border-border bg-white p-5">
-              <h2 className="font-semibold text-veyra-navy">Local AI</h2>
-              <p className="mt-2 text-sm text-muted-foreground">Run compatible models on your computer. Availability and hardware requirements depend on your device.</p>
-            </div>
-          </div>
-          <p className="mx-auto mt-4 max-w-5xl px-4 text-xs text-muted-foreground lg:px-8">Local inference and BYOK are usage methods, not VEYRA Cloud subscriptions. Hybrid use combines the methods you configure; it does not imply an included cloud allowance.</p>
-        </section>
-
-        {checkoutNotice && <div role="status" className="mx-auto mt-6 max-w-5xl rounded-xl border border-indigo-100 bg-white px-4 py-3 text-sm text-slate-700">{checkoutNotice}</div>}
-
-        <section className="py-20">
-          <div className="max-w-5xl mx-auto px-4 lg:px-8">
+        <section aria-labelledby="available-plans-title" className="py-12 md:py-16">
+          <div className="mx-auto max-w-5xl px-5 lg:px-8">
+            {checkoutNotice && (
+              <div role="status" className="mb-6 rounded-xl border border-veyra-design-lavender-200 bg-veyra-design-lavender-50 px-4 py-3 text-sm text-veyra-navy">
+                {checkoutNotice}
+              </div>
+            )}
             {countries.length > 0 && (
               <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <label htmlFor="pricing-region" className="text-sm font-medium text-slate-700">Regional prices and explicitly configured USD offers</label>
+                <label htmlFor="pricing-region" className="text-sm font-semibold text-veyra-navy">
+                  Select your billing region
+                </label>
                 <select
                   id="pricing-region"
                   value={detected ? `${detected.country}:${detected.currency}` : ''}
@@ -310,49 +332,92 @@ export default function PricingPage() {
                     const selected = countries.find((country) => `${country.country}:${country.currency}` === event.target.value);
                     if (selected) setDetected({ country: selected.country, currency: selected.currency, currencySymbol: selected.currencySymbol });
                   }}
-                  className="min-h-11 rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-900 shadow-sm"
+                  className="min-h-11 rounded-xl border border-border bg-white px-3 text-sm text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   {countries.map((country) => <option key={`${country.country}:${country.currency}`} value={`${country.country}:${country.currency}`}>{country.countryName} ({country.currency})</option>)}
                 </select>
               </div>
             )}
-            {error && (
-              <div className="rounded-md border border-red-200 bg-red-50 p-4 mb-8 text-sm text-red-800">
+            <div className="mb-6">
+              <h2 id="available-plans-title" className="text-2xl font-bold tracking-tight text-veyra-navy">
+                Available Cloud plans
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                {detected
+                  ? `Showing ${billingInterval === 'yearly' ? 'annual' : 'monthly'} offers for ${detected.country}.`
+                  : 'Offers are based on the billing region returned by the Platform.'}
+              </p>
+            </div>
+            {error && plans.length > 0 && (
+              <div role="alert" className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
                 {error}
               </div>
             )}
 
             {plansLoading && !plans.length && detected ? (
-              <div role="status" className="rounded-xl border border-border bg-white p-8 text-center text-sm text-slate-600">Loading configured plans...</div>
-            ) : detected && plans.length > 0 ? (
+              <div role="status" className="rounded-xl border border-border bg-white p-8 text-center text-sm text-muted-foreground">
+                Loading configured plans…
+              </div>
+            ) : detected && visiblePlans.length > 0 ? (
               <>
-              {plansSource === 'cache' && cachedAt && <div role="status" className="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">Showing the last verified price retrieved {new Date(cachedAt).toLocaleString()}. It is for reference only; reconnect to confirm the offer before checkout.</div>}
-              <div className="grid md:grid-cols-3 gap-6">
-                {plans.map((plan) => {
+              {plansSource === 'cache' && cachedAt && (
+                <div role="status" className="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
+                  Showing the last verified price retrieved {new Date(cachedAt).toLocaleString()}. It is for reference only; reconnect to confirm the offer before checkout.
+                </div>
+              )}
+              {hasForeignCurrencyPlans && !exchangeRate?.rate && exchangeRateError && (
+                <div role="status" className="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+                  Live currency conversion is unavailable. Offers in a different currency are shown in their published currency.
+                </div>
+              )}
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {visiblePlans.map((plan) => {
                   const offerKey = `${plan.planId}:${plan.billingInterval}`;
-                  const rate = exchangeRate?.rate ?? 1;
                   const isSameCurrency = plan.currency === detected.currency;
-                  const convertedAmount = isSameCurrency ? plan.amountCents : Math.round((plan.amountCents * rate) * 100) / 100;
-                  const rateInfo = exchangeRate?.rate ? `1 USD = ${exchangeRate.rate.toFixed(4)} ${detected.currency}` : null;
-                  return <Card key={offerKey} className="overflow-hidden hover:shadow-lg transition-shadow">
-                    <CardHeader>
-                      <CardTitle>{plan.planName}</CardTitle>
-                      <CardDescription>{plan.planFamily}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-baseline gap-2 mb-4">
-                        <span className="text-3xl font-bold text-veyra-navy">
-                          {formatCurrency(convertedAmount, plan.currency)}
-                        </span>
-                        <span className="text-sm text-muted-foreground">/{plan.billingInterval}</span>
+                  const canConvert = !isSameCurrency && plan.currency === 'USD' &&
+                    typeof exchangeRate?.rate === 'number' && Number.isFinite(exchangeRate.rate) && exchangeRate.rate > 0;
+                  const displayCurrency = canConvert ? detected.currency : plan.currency;
+                  const displayAmount = plan.amountCents / 100 * (canConvert ? exchangeRate.rate : 1);
+                  return <article
+                    key={offerKey}
+                    className="flex h-full flex-col rounded-2xl border border-border bg-white p-5 sm:p-6"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-veyra-indigo">
+                          {plan.planFamily} plan
+                        </p>
+                        <h3 className="mt-2 text-xl font-bold text-veyra-navy">{plan.planName}</h3>
                       </div>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        {isSameCurrency
-                          ? 'Regional price'
-                          : `Converted from USD at rate ${exchangeRate?.rate?.toFixed(4)}. ${exchangeRate.isLive ? '' : 'Uses cached rate — may be stale.'}`}
+                      <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                        plan.isAvailable
+                          ? 'bg-emerald-50 text-emerald-800'
+                          : 'bg-secondary text-muted-foreground'
+                      }`}>
+                        {plan.isAvailable ? 'Available' : 'Unavailable'}
+                      </span>
+                    </div>
+                    {plan.description && (
+                      <p className="mt-3 min-h-12 text-sm leading-6 text-muted-foreground">
+                        {plan.description}
                       </p>
-                    </CardContent>
-                    <CardFooter>
+                    )}
+                    <div className="mt-6 flex items-baseline gap-2">
+                      <span className="text-3xl font-bold tracking-tight text-veyra-navy">
+                        {formatCurrency(displayAmount, displayCurrency)}
+                      </span>
+                      <span className="text-sm text-muted-foreground">
+                        /{plan.billingInterval === 'yearly' ? 'year' : 'month'}
+                      </span>
+                    </div>
+                    <p className="mt-2 min-h-10 text-xs leading-5 text-muted-foreground">
+                      {isSameCurrency
+                        ? 'Published regional price'
+                        : canConvert
+                          ? `Converted from USD at 1 USD = ${exchangeRate.rate.toFixed(4)} ${detected.currency}.`
+                          : `Published in ${plan.currency}; conversion is unavailable.`}
+                    </p>
+                    <div className="mt-auto border-t border-border pt-5">
                       <Button
                         disabled={!plan.isAvailable || plansSource !== 'live' || checkoutPlanId === offerKey}
                         onClick={() => startCheckout(plan)}
@@ -360,54 +425,69 @@ export default function PricingPage() {
                       >
                         {checkoutPlanId === offerKey
                           ? 'Connecting to checkout…'
+                          : !plan.isAvailable
+                            ? 'Unavailable'
                           : plansSource !== 'live'
                             ? 'Price needs verification'
                             : session?.accessToken
                             ? 'Continue to checkout'
                             : 'Sign in to continue'}
                       </Button>
-                    </CardFooter>
-                  </Card>;
+                    </div>
+                  </article>;
                 })}
               </div>
               </>
-            ) : (
-              <div className="rounded-xl border border-dashed border-border bg-secondary/50 p-8 text-center">
-                <h3 className="text-lg font-semibold text-veyra-navy mb-2">{error ? 'Regional pricing is unavailable' : detected ? 'No plans available yet' : 'Regional pricing could not be loaded'}</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  {error ? 'The pricing service could not be reached. Please try again later.' : detected ? 'Commercial pricing has not been configured in the Platform for this region.' : 'The Platform did not return a supported region for pricing.'}
+            ) : plans.length > 0 ? (
+              <div className="rounded-2xl border border-dashed border-border bg-white p-8 text-center">
+                <h3 className="text-lg font-semibold text-veyra-navy">
+                  No {billingInterval === 'yearly' ? 'annual' : 'monthly'} offers are published for this region
+                </h3>
+                <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
+                  Try the other billing interval or choose a different supported region. VEYRA does not estimate unpublished prices.
                 </p>
-                <p className="text-xs text-muted-foreground">
-                  Prices, currencies, allowances, and included features come from the Platform.
-                  No prices are invented here.
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-dashed border-border bg-white p-8 text-center">
+                <h3 className="text-lg font-semibold text-veyra-navy">
+                  {error ? 'Regional pricing is unavailable' : detected ? 'No plans are published yet' : 'Choose a supported region'}
+                </h3>
+                <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
+                  {error
+                    ? error
+                    : detected
+                      ? 'No Cloud plans are currently available for this region.'
+                      : 'The Platform did not return a supported billing region.'}
                 </p>
               </div>
               )}
             </div>
           </section>
 
-          <section className="py-20 bg-secondary/50">
-            <div className="max-w-3xl mx-auto px-4 lg:px-8">
-              <div className="rounded-2xl border border-border bg-card p-8 lg:p-12">
-                <h2 className="text-2xl font-bold text-veyra-navy mb-6">How billing works</h2>
-                <ul className="space-y-4 text-sm text-muted-foreground max-w-lg mx-auto">
-                  <li className="flex items-start gap-3">
-                    <span className="mt-0.5 h-3 w-3 rounded-full bg-veyra-indigo" />
-                    <span>Checkout is initiated through the Platform ({'/api/v1/payments/checkout'}).</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="mt-0.5 h-3 w-3 rounded-full bg-veyra-indigo" />
-                    <span>Payment state comes from verified Platform records and webhooks — never from the browser.</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="mt-0.5 h-3 w-3 rounded-full bg-veyra-indigo" />
-                    <span>Subscriptions can be cancelled or reactivated through your dashboard.</span>
-                  </li>
-                </ul>
+          <section aria-labelledby="pricing-details-title" className="border-y border-border bg-secondary/40 py-10 md:py-12">
+            <div className="mx-auto max-w-5xl px-5 lg:px-8">
+              <div className="grid gap-4 md:grid-cols-2">
+                <article className="rounded-xl border border-border bg-white p-5 sm:p-6">
+                  <h2 id="pricing-details-title" className="font-semibold text-veyra-navy">Plan details</h2>
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                    The public pricing service does not provide feature limits or usage allowances. This page shows only published offer details and does not estimate what a plan includes.
+                  </p>
+                  <Link href="/features" className="mt-4 inline-flex text-sm font-semibold text-veyra-indigo hover:text-veyra-violet">
+                    Explore VEYRA features
+                  </Link>
+                </article>
+                <article className="rounded-xl border border-[#D6CBFF] bg-[#F5F2FF] p-5 sm:p-6">
+                  <h2 className="font-semibold text-veyra-navy">Cloud is one way to use VEYRA</h2>
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                    Bring-your-own-provider and local modes are separate from VEYRA Cloud subscriptions. Provider charges and hardware requirements are separate.
+                  </p>
+                  <Link href="/ai-configuration" className="mt-4 inline-flex text-sm font-semibold text-veyra-indigo hover:text-veyra-violet">
+                    Compare AI configuration modes
+                  </Link>
+                </article>
               </div>
             </div>
           </section>
-        </section>
       </main>
       <Footer />
     </div>

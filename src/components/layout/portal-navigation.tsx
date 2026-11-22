@@ -30,6 +30,7 @@ const adminLinks = [
   { href: '/admin/notifications', label: 'Notifications', icon: Bell },
   { href: '/admin/roles', label: 'Roles & permissions', icon: ShieldCheck },
   { href: '/admin/audit', label: 'Audit logs', icon: FileClock },
+  { href: '/admin/health', label: 'System health', icon: Activity },
   { href: '/admin/support', label: 'Support', icon: LifeBuoy },
   { href: '/admin/errors', label: 'Errors', icon: Workflow },
 ];

@@ -1,63 +1,52 @@
-'use client';
-
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Play, List, Check, ArrowRight } from 'lucide-react';
-import { motion, useReducedMotion } from 'framer-motion';
+import { Check, FileText, Mic2, Layers3, Target } from 'lucide-react';
 
 export function HowItWorksSection() {
-  const reduceMotion = useReducedMotion();
   const steps = [
     {
-      step: '01',
-      title: 'Set up your profile',
-      description:
-        'Add your CV, experience, skills, and target roles. VEYRA uses this authorised context to tailor assistance and practice questions.',
+      icon: FileText,
+      title: 'Add your context',
+      description: 'Import your CV, projects and job description. Confirm what is true.',
     },
     {
-      step: '02',
-      title: 'Choose your mode',
-      description:
-        'Select live interview assistance for real-time cues during an interview, or interview practice to prepare beforehand.',
+      icon: Mic2,
+      title: 'Start when you decide',
+      description: 'Microphone and screen capture stay off until you press Start. State is always visible.',
     },
     {
-      step: '03',
-      title: 'Interview with confidence',
-      description:
-        'Use Desktop guidance when you choose, then review practice feedback and prepare for your next interview.',
+      icon: Layers3,
+      title: 'Get a grounded answer',
+      description: 'See concise suggestions with the exact evidence behind them.',
+    },
+    {
+      icon: Target,
+      title: 'Review and practise',
+      description: 'Turn each session into a report and targeted practice.',
     },
   ];
 
   return (
-    <section className="py-20 border-y border-border">
-      <div className="max-w-7xl mx-auto px-4 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold text-veyra-navy mb-4">How it works</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            From setup to confident interviewing in three steps.
-          </p>
-        </div>
+    <section className="bg-background py-10 min-[700px]:py-[72px]">
+      <div className="mx-auto max-w-[1440px] px-5 min-[700px]:px-16">
+        <div className="mx-auto max-w-[1280px]">
+          <div className="mb-8 text-center min-[700px]:mb-10">
+            <h2 className="text-2xl font-bold text-[#0F1B3D]">How it works</h2>
+            <p className="mt-2 text-sm text-[#6B7694]">Four steps from setup to a better answer</p>
+          </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
-          {steps.map((step) => (
-            <motion.div
-              key={step.step}
-              initial={reduceMotion ? false : { opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={reduceMotion ? { duration: 0 } : { duration: 0.6 }}
-              className="rounded-xl border border-border bg-card p-8"
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-veyra-indigo text-white font-bold">
-                  {step.step}
+          <div className="grid gap-4 min-[1100px]:grid-cols-4">
+            {steps.map(({ icon: Icon, title, description }, index) => (
+              <div key={title} className="rounded-xl border border-border bg-card p-5 shadow-[0_8px_24px_rgba(15,27,61,0.06)]">
+                <div className="mb-4 flex items-center gap-3">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#EAE4FF] text-[#5638C4]"><Icon aria-hidden="true" className="h-5 w-5" /></span>
+                  <span className="text-[13px] font-bold text-[#D6CBFF]">0{index + 1}</span>
                 </div>
-                <Play className="h-5 w-5 text-veyra-indigo" />
+                <h3 className="text-[17px] font-semibold text-[#0F1B3D]">{title}</h3>
+                <p className="mt-2 text-sm leading-[21px] text-[#3B4766]">{description}</p>
               </div>
-              <h3 className="text-lg font-semibold text-veyra-navy mb-3">{step.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{step.description}</p>
-            </motion.div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </section>
@@ -209,22 +198,25 @@ export function FAQPreviewSection() {
 
 export function CTASection() {
   return (
-    <section className="py-24">
-      <div className="max-w-4xl mx-auto px-4 lg:px-8">
-        <div className="rounded-2xl border border-border bg-veyra-navy p-10 lg:p-16 text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">Ready to interview with confidence?</h2>
-          <p className="text-muted-foreground/80 text-lg mb-8 max-w-2xl mx-auto leading-relaxed">
-            Get live assistance during interviews and practise before they happen. VEYRA is your AI-powered interview companion.
+    <section className="bg-[#F7F8FC] py-10 min-[700px]:py-[72px]">
+      <div className="mx-auto max-w-[1280px] px-5 min-[700px]:px-16">
+        <div className="rounded-2xl border border-[#E4E7F0] bg-[#0F1B3D] px-6 py-10 text-center min-[700px]:px-12 min-[700px]:py-14">
+          <h2 className="text-balance text-[28px] font-bold leading-9 text-white min-[700px]:text-[36px] min-[700px]:leading-[44px]">
+            Prepare once. Interview with confidence.
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-slate-200 min-[700px]:text-base">
+            Explore VEYRA Desktop for interview preparation and optional in-session guidance.
+            Available capabilities depend on the release and your configuration.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/register">
-              <Button size="lg" className="w-full sm:w-auto bg-white text-veyra-navy hover:bg-veyra-indigo/10">
-                Get started free
+          <div className="mt-7 flex flex-col justify-center gap-3 min-[700px]:flex-row">
+            <Link href="/download">
+              <Button size="lg" className="w-full rounded-[10px] bg-white px-5 font-semibold text-[#0F1B3D] hover:bg-[#F5F2FF] min-[700px]:w-auto">
+                Download VEYRA
               </Button>
             </Link>
-            <Link href="/download">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto">
-                Download Desktop app
+            <Link href="/how-it-works">
+              <Button size="lg" variant="outline" className="w-full rounded-[10px] border-white/40 bg-white/5 px-5 font-semibold text-white hover:bg-white/10 min-[700px]:w-auto">
+                See how it works
               </Button>
             </Link>
           </div>

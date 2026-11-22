@@ -23,6 +23,7 @@ describe('redirect validation', () => {
 
   it('allows an absolute URL on the configured application origin', () => {
     expect(isTrustedRedirect('http://localhost:5173/dashboard')).toBe(true);
+    expect(isTrustedRedirect('http://localhost:51730/dashboard')).toBe(false);
     expect(isTrustedRedirect('http://localhost:3001/dashboard')).toBe(false);
   });
 

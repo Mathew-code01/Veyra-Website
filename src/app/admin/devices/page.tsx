@@ -1,67 +1,182 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useAuth } from '@/components/auth/auth-provider';
 import { VeyraPlatformClient } from '@/services/platform/client';
 import { userFriendlyMessage, isAuthError, isPermissionError } from '@/services/platform/errors';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import Link from 'next/link';
-import { Monitor, AlertTriangle, Shield, Info } from 'lucide-react';
+import {
+  AlertCircle,
+  CheckCircle2,
+  Info,
+  Laptop,
+  Monitor,
+  Search,
+  Shield,
+  ShieldAlert,
+  XCircle,
+} from 'lucide-react';
+
+const panel = "rounded-xl border border-[#E2E5EF] bg-white shadow-[0_12px_36px_-28px_rgba(24,32,68,0.34)]";
 
 export default function AdminDevices() {
-  const { session, client } = useAuth();
-  const [loading, setLoading] = useState(true);
+  const { session, client, logout } = useAuth();
+  const [userId, setUserId] = useState('');
+  const [deviceId, setDeviceId] = useState('');
+  const [reason, setReason] = useState('Administrative session revocation');
+  const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [permissionError, setPermissionError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const handleRevoke = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!client || !session?.accessToken) return;
+    if (!userId.trim() || !deviceId.trim()) {
+      setError('Both User ID and Device ID are required.');
+      return;
+    }
     const c = client as VeyraPlatformClient;
-    c.adminStats()
-      .then(() => {})
-      .catch((err: any) => {
-        if (isPermissionError(err)) setPermissionError('Admin role required for device revocation.');
-        else if (!isAuthError(err)) setError(userFriendlyMessage(err));
-      })
-      .finally(() => setLoading(false));
-  }, [client, session?.accessToken]);
+    setBusy(true);
+    setError(null);
+    setSuccess(null);
+    setPermissionError(null);
+    try {
+      const res = await c.adminRevokeDevice({
+        userId: userId.trim(),
+        deviceId: deviceId.trim(),
+        reason: reason.trim() || 'Administrative session revocation',
+      });
+      if (res.ok) {
+        setSuccess(`Device ${deviceId.trim()} has been revoked for user ${userId.trim()}.`);
+        setDeviceId('');
+      } else {
+        setError('Device revocation could not be processed.');
+      }
+    } catch (err: any) {
+      if (isPermissionError(err)) {
+        setPermissionError('Admin role required. You do not have permission to revoke device authorization.');
+      } else if (isAuthError(err)) {
+        await logout();
+      } else {
+        setError(userFriendlyMessage(err));
+      }
+    } finally {
+      setBusy(false);
+    }
+  };
 
   if (!session) return null;
 
   if (permissionError) {
     return (
-      <div className="max-w-2xl mx-auto px-6 py-12 lg:px-8 lg:py-16">
-        <div className="rounded-xl border border-dashed border-amber-200 bg-amber-50 p-8 text-center">
-          <Shield className="h-8 w-8 mx-auto mb-4 text-amber-600" />
-          <h2 className="text-xl font-bold text-veyra-navy mb-2">Admin access required</h2>
-          <p className="text-sm text-muted-foreground">{permissionError}</p>
-        </div>
+      <div className="mx-auto max-w-2xl rounded-2xl border border-amber-200 bg-amber-50/70 p-10 text-center">
+        <Shield className="mx-auto mb-4 h-10 w-10 text-amber-600" />
+        <h2 className="mb-2 text-xl font-bold text-[#182044]">Admin access required</h2>
+        <p className="text-sm text-[#4E5A7E]">{permissionError}</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-8 lg:px-8 lg:py-12">
-      <h1 className="text-3xl font-bold text-veyra-navy mb-6">Devices</h1>
-      {loading && <div className="h-32 bg-secondary/50 rounded-xl animate-pulse" />}
-      {!loading && permissionError && (
-        <div className="rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">{permissionError}</div>
-      )}
-      {!loading && !permissionError && (
-        <div className="rounded-xl border border-dashed border-border bg-secondary/50 p-8 text-center">
-          <Monitor className="h-8 w-8 mx-auto mb-3 text-muted-foreground" />
-          <h3 className="text-lg font-semibold text-veyra-navy mb-2">Device management</h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            Device revocation is available via the Platform (admin role). Device listing per-user is available
-            in the customer dashboard.
-          </p>
+    <div className="space-y-6">
+      {/* Header */}
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-[.14em] text-[#6b4fe0]">Device Governance</p>
+        <h1 className="mt-2 text-[28px] font-bold tracking-tight text-[#182044] sm:text-[32px]">
+          Device Management &amp; Revocation
+        </h1>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-[#4E5A7E]">
+          Inspect device authorizations and revoke compromised or decommissioned desktop installations.
+        </p>
+      </div>
+
+      {error && (
+        <div
+          role="alert"
+          className="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800"
+        >
+          <XCircle size={16} className="mt-0.5 shrink-0" />
+          <span>{error}</span>
         </div>
       )}
-      {error && <div className="rounded-md border border-red-200 bg-red-50 p-4 mt-6 text-sm text-red-800">{error}</div>}
+      {success && (
+        <div
+          role="status"
+          className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
+        >
+          <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-600" />
+          <span>{success}</span>
+        </div>
+      )}
+
+      {/* Revocation form */}
+      <div className={`${panel} max-w-2xl p-6`}>
+        <div className="flex items-center gap-2 pb-4 border-b border-[#E2E5EF]">
+          <ShieldAlert size={18} className="text-[#6b4fe0]" />
+          <h2 className="font-semibold text-[#182044]">Revoke Device Authorization</h2>
+        </div>
+        <p className="mt-2 text-xs leading-5 text-[#8891A9]">
+          Revoking a device invalidates its local session and device refresh token. The installation will be blocked from Platform services until re-registered.
+        </p>
+
+        <form onSubmit={handleRevoke} className="mt-5 space-y-4">
+          <div>
+            <label className="text-xs font-bold uppercase tracking-wider text-[#8891A9]">
+              User ID
+            </label>
+            <input
+              type="text"
+              value={userId}
+              onChange={(e) => setUserId(e.target.value)}
+              placeholder="e.g. usr_8f2a... or UUID"
+              className="mt-1.5 h-10 w-full rounded-lg border border-[#E2E5EF] bg-white px-3 text-sm text-[#182044] outline-none font-mono placeholder:text-[#8891A9] focus:border-[#6b4fe0] focus:ring-2 focus:ring-[#6b4fe0]/20"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-bold uppercase tracking-wider text-[#8891A9]">
+              Device ID to Revoke
+            </label>
+            <input
+              type="text"
+              value={deviceId}
+              onChange={(e) => setDeviceId(e.target.value)}
+              placeholder="e.g. dev_55a1... or hardware UUID"
+              className="mt-1.5 h-10 w-full rounded-lg border border-[#E2E5EF] bg-white px-3 text-sm text-[#182044] outline-none font-mono placeholder:text-[#8891A9] focus:border-[#6b4fe0] focus:ring-2 focus:ring-[#6b4fe0]/20"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-bold uppercase tracking-wider text-[#8891A9]">
+              Reason (saved to audit trail)
+            </label>
+            <input
+              type="text"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder="Reason for revocation"
+              className="mt-1.5 h-10 w-full rounded-lg border border-[#E2E5EF] bg-white px-3 text-sm text-[#182044] outline-none placeholder:text-[#8891A9] focus:border-[#6b4fe0] focus:ring-2 focus:ring-[#6b4fe0]/20"
+            />
+          </div>
+
+          <div className="pt-2">
+            <Button type="submit" disabled={busy || !userId.trim() || !deviceId.trim()}>
+              {busy ? 'Revoking…' : 'Revoke device session'}
+            </Button>
+          </div>
+        </form>
+      </div>
+
+      {/* Security notice */}
+      <div className="flex items-start gap-3 rounded-xl border border-[#E2E5EF] bg-white p-4 text-xs text-[#8891A9]">
+        <Info size={16} className="mt-0.5 shrink-0 text-[#6b4fe0]" />
+        <p className="leading-5">
+          Revocation calls are authorized server-side and recorded to the audit log. Device listing per-user is also available inside each user profile.
+        </p>
+      </div>
     </div>
   );
 }
-
-
-

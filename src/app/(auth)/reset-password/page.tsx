@@ -5,14 +5,15 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import Link from 'next/link';
-import { Lock } from 'lucide-react';
+import { Lock, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { PasswordInput } from '@/components/ui/password-input';
 import { VeyraLogo } from '@/components/marketing/logo';
 import { getSupabase } from '@/lib/env';
 
 const ResetSchema = z.object({
   password: z.string().min(8, 'Password must be at least 8 characters'),
-  confirmPassword: z.string(),
+  confirmPassword: z.string().min(1, 'Please confirm your new password'),
 }).refine((data) => data.password === data.confirmPassword, {
   message: 'Passwords do not match',
   path: ['confirmPassword'],
@@ -71,31 +72,46 @@ export default function ResetPasswordPage() {
         {done ? (
           <section className="rounded-2xl border border-border bg-card p-8 text-center shadow-sm">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100">
-              <Lock className="h-6 w-6 text-emerald-700" aria-hidden="true" />
+              <CheckCircle2 className="h-6 w-6 text-emerald-700" aria-hidden="true" />
             </div>
             <h1 className="mb-2 text-2xl font-bold text-veyra-navy">Password updated</h1>
             <p className="mb-6 text-sm text-muted-foreground">You can now sign in with your new password.</p>
-            <Link href="/login"><Button>Sign in</Button></Link>
+            <Link href="/login"><Button className="h-11 px-6">Sign in</Button></Link>
           </section>
         ) : (
           <>
             <h1 className="mb-2 text-3xl font-bold text-veyra-navy">Reset password</h1>
             <p className="mb-8 text-sm text-muted-foreground">Choose a new password for your VEYRA account.</p>
-            {error && <div role="alert" className="mb-6 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800">{error}</div>}
+            {error && (
+              <div role="alert" className="mb-6 flex gap-3 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">
+                <AlertCircle className="h-5 w-5 shrink-0 text-rose-600 mt-0.5" />
+                <div className="leading-snug">{error}</div>
+              </div>
+            )}
             {!recoveryReady && !error && <p role="status" className="mb-6 text-sm text-muted-foreground">Verifying your reset link…</p>}
             {recoveryReady ? (
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
                 <div className="space-y-2">
                   <label htmlFor="password" className="text-sm font-medium">New password</label>
-                  <input id="password" {...form.register('password')} type="password" autoComplete="new-password" className="input" />
+                  <PasswordInput
+                    id="password"
+                    {...form.register('password')}
+                    autoComplete="new-password"
+                    placeholder="At least 8 characters"
+                  />
                   {form.formState.errors.password && <p className="text-xs text-destructive">{form.formState.errors.password.message}</p>}
                 </div>
                 <div className="space-y-2">
                   <label htmlFor="confirmPassword" className="text-sm font-medium">Confirm new password</label>
-                  <input id="confirmPassword" {...form.register('confirmPassword')} type="password" autoComplete="new-password" className="input" />
+                  <PasswordInput
+                    id="confirmPassword"
+                    {...form.register('confirmPassword')}
+                    autoComplete="new-password"
+                    placeholder="Repeat your new password"
+                  />
                   {form.formState.errors.confirmPassword && <p className="text-xs text-destructive">{form.formState.errors.confirmPassword.message}</p>}
                 </div>
-                <Button type="submit" className="w-full" disabled={submitting}>
+                <Button type="submit" className="w-full h-11" disabled={submitting}>
                   {submitting ? 'Updating…' : 'Update password'}
                 </Button>
               </form>
@@ -104,7 +120,7 @@ export default function ResetPasswordPage() {
             ) : null}
           </>
         )}
-        {!done && <p className="mt-8 text-center text-sm text-muted-foreground">Remember your password? <Link href="/login" className="font-medium text-veyra-indigo hover:underline">Sign in</Link></p>}
+        {!done && <p className="mt-8 text-center text-sm text-muted-foreground">Remember your password? <Link href="/login" className="font-semibold text-veyra-indigo hover:underline">Sign in</Link></p>}
       </div>
     </div>
   );
