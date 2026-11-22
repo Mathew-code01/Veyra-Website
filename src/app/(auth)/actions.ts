@@ -16,9 +16,13 @@ function getClient() {
 }
 
 export async function loginAction(formData: FormData) {
-  const email = formData.get('email') as string;
+  const email = (formData.get('email') as string)?.trim();
   const password = formData.get('password') as string;
   const redirectTo = formData.get('redirectTo') as string | null;
+
+  if (!email || !password) {
+    return { error: 'Please enter both your email address and password.' };
+  }
 
   const safeRedirect = isTrustedRedirect(redirectTo) ? (redirectTo ?? '/') : '/';
 
@@ -27,17 +31,25 @@ export async function loginAction(formData: FormData) {
     const client = getClient();
     result = await client.login(email, password);
     writeTokenCookies(await cookies(), result.accessToken, result.refreshToken, result.expiresIn);
-  } catch (err: any) {
-    return { error: err?.message ?? 'Login failed. Please try again.' };
+  } catch (err: unknown) {
+    const normalized = normalizeError(err, "We couldn't sign you in with those details. Check your information and try again.");
+    return { error: userFriendlyMessage(normalized) };
   }
 
   redirect(safeRedirect);
 }
 
 export async function registerAction(formData: FormData) {
-  const email = formData.get('email') as string;
+  const email = (formData.get('email') as string)?.trim();
   const password = formData.get('password') as string;
   const redirectTo = formData.get('redirectTo') as string | null;
+
+  if (!email || !password) {
+    return { error: 'Please enter both an email address and a password.' };
+  }
+  if (password.length < 8) {
+    return { error: 'Password must be at least 8 characters.' };
+  }
 
   const safeRedirect = isTrustedRedirect(redirectTo) ? (redirectTo ?? '/') : '/';
 
@@ -45,9 +57,28 @@ export async function registerAction(formData: FormData) {
   try {
     const client = getClient();
     result = await client.register(email, password);
+    if (!result.accessToken) {
+      // Email confirmation is required by Supabase Auth before sign-in
+      return {
+        success: true,
+        message: 'Your account has been created successfully. Please check your inbox and confirm your email before signing in.',
+        needsConfirmation: true,
+      };
+    }
     writeTokenCookies(await cookies(), result.accessToken, result.refreshToken, result.expiresIn);
-  } catch (err: any) {
-    return { error: err?.message ?? 'Registration failed. Please try again.' };
+  } catch (err: unknown) {
+    const normalized = normalizeError(err, 'Unable to create your account. Please check your details and try again.');
+    const isExistingUser =
+      normalized.code === 'USER_ALREADY_EXISTS' ||
+      /already registered|already exists/i.test(normalized.message);
+    if (isExistingUser) {
+      return {
+        error: 'An account may already be associated with this email address. Try signing in instead, or reset your password if you need help accessing your account.',
+        code: 'USER_ALREADY_EXISTS',
+        email,
+      };
+    }
+    return { error: userFriendlyMessage(normalized), code: normalized.code };
   }
 
   redirect(safeRedirect);

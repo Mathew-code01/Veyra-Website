@@ -1,34 +1,40 @@
 'use client';
 
-import { useState } from 'react';
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import Link from 'next/link';
 import { loginAction } from '@/app/(auth)/actions';
-import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { Mail, AlertCircle } from 'lucide-react';
 import { VeyraLogo } from '@/components/marketing/logo';
 import { AuthLayout } from '@/components/auth/AuthLayout';
 import { OAuthButtons } from '@/components/auth/OAuthButtons';
 
 const LoginSchema = z.object({
-  email: z.string().email('Invalid email address'),
+  email: z.string().email('Please enter a valid email address'),
   password: z.string().min(1, 'Password is required'),
 });
 
 export default function LoginPage() {
   const [redirectTo, setRedirectTo] = useState('/dashboard');
-  useEffect(() => { setRedirectTo(new URLSearchParams(window.location.search).get('redirectTo') ?? '/dashboard'); }, []);
-  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
     defaultValues: { email: '', password: '' },
   });
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setRedirectTo(params.get('redirectTo') ?? '/dashboard');
+    const emailParam = params.get('email');
+    if (emailParam) {
+      form.setValue('email', emailParam);
+    }
+  }, [form]);
 
   const onSubmit = async (data: z.infer<typeof LoginSchema>) => {
     setError(null);
@@ -55,8 +61,26 @@ export default function LoginPage() {
         </p>
 
         {error && (
-          <div className="mb-6 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800">
-            {error}
+          <div role="alert" className="mb-6 flex gap-3 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">
+            <AlertCircle className="h-5 w-5 shrink-0 text-rose-600 mt-0.5" />
+            <div className="leading-snug">
+              {error}
+              <div className="mt-2.5 flex flex-wrap items-center gap-3 text-xs">
+                <Link
+                  href={`/forgot-password?email=${encodeURIComponent(form.getValues('email') || '')}`}
+                  className="font-medium text-rose-900 underline hover:text-rose-950"
+                >
+                  Forgot your password?
+                </Link>
+                <span className="text-rose-400">•</span>
+                <Link
+                  href={`/register?redirectTo=${encodeURIComponent(redirectTo)}`}
+                  className="font-semibold text-veyra-indigo underline hover:text-veyra-navy"
+                >
+                  Create an account
+                </Link>
+              </div>
+            </div>
           </div>
         )}
 
@@ -66,12 +90,13 @@ export default function LoginPage() {
               Email address
             </label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
               <input
                 id="email"
                 {...form.register('email')}
                 type="email"
-                className="input pl-9"
+                autoComplete="email"
+                className="input pl-10"
                 placeholder="you@example.com"
               />
             </div>
@@ -84,46 +109,34 @@ export default function LoginPage() {
             <label htmlFor="password" className="text-sm font-medium">
               Password
             </label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <input
-                id="password"
-                {...form.register('password')}
-                type={showPassword ? 'text' : 'password'}
-                className="input pr-10 pl-9"
-                placeholder="••••••••"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                aria-label="Toggle password visibility"
-              >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </div>
+            <PasswordInput
+              id="password"
+              {...form.register('password')}
+              autoComplete="current-password"
+              placeholder="••••••••"
+            />
             {form.formState.errors.password && (
               <p className="text-xs text-destructive">{form.formState.errors.password.message}</p>
             )}
           </div>
 
           <div className="flex items-center justify-between">
-            <label className="text-sm flex items-center gap-2 cursor-pointer">
+            <label className="text-sm flex items-center gap-2 cursor-pointer select-none">
               <input type="checkbox" className="rounded border-border" /> Remember me
             </label>
-            <Link href="/forgot-password" className="text-sm text-veyra-indigo hover:underline">
+            <Link href="/forgot-password" className="text-sm text-veyra-indigo hover:underline font-medium">
               Forgot password?
             </Link>
           </div>
 
-          <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+          <Button type="submit" className="w-full h-11" disabled={form.formState.isSubmitting}>
             {form.formState.isSubmitting ? 'Signing in…' : 'Sign in'}
           </Button>
         </form>
 
         <p className="mt-8 text-center text-sm text-muted-foreground">
           Don't have an account?{' '}
-          <Link href={`/register?redirectTo=${encodeURIComponent(redirectTo)}`} className="text-veyra-indigo font-medium hover:underline">
+          <Link href={`/register?redirectTo=${encodeURIComponent(redirectTo)}`} className="text-veyra-indigo font-semibold hover:underline">
             Create an account
           </Link>
         </p>

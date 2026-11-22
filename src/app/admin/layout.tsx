@@ -9,6 +9,10 @@ import { getSessionFromCookie } from '@/services/platform/auth';
 export const metadata = {
   title: 'VEYRA administration',
   description: 'Authorized Veyra Platform administration.',
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {

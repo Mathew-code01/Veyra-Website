@@ -198,22 +198,25 @@ export function FAQPreviewSection() {
 
 export function CTASection() {
   return (
-    <section className="py-24">
-      <div className="max-w-4xl mx-auto px-4 lg:px-8">
-        <div className="rounded-2xl border border-border bg-veyra-navy p-10 lg:p-16 text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">Ready to interview with confidence?</h2>
-          <p className="text-muted-foreground/80 text-lg mb-8 max-w-2xl mx-auto leading-relaxed">
-            Get live assistance during interviews and practise before they happen. VEYRA is your AI-powered interview companion.
+    <section className="bg-[#F7F8FC] py-10 min-[700px]:py-[72px]">
+      <div className="mx-auto max-w-[1280px] px-5 min-[700px]:px-16">
+        <div className="rounded-2xl border border-[#E4E7F0] bg-[#0F1B3D] px-6 py-10 text-center min-[700px]:px-12 min-[700px]:py-14">
+          <h2 className="text-balance text-[28px] font-bold leading-9 text-white min-[700px]:text-[36px] min-[700px]:leading-[44px]">
+            Prepare once. Interview with confidence.
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-slate-200 min-[700px]:text-base">
+            Explore VEYRA Desktop for interview preparation and optional in-session guidance.
+            Available capabilities depend on the release and your configuration.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/register">
-              <Button size="lg" className="w-full sm:w-auto bg-white text-veyra-navy hover:bg-veyra-indigo/10">
-                Get started free
+          <div className="mt-7 flex flex-col justify-center gap-3 min-[700px]:flex-row">
+            <Link href="/download">
+              <Button size="lg" className="w-full rounded-[10px] bg-white px-5 font-semibold text-[#0F1B3D] hover:bg-[#F5F2FF] min-[700px]:w-auto">
+                Download VEYRA
               </Button>
             </Link>
-            <Link href="/download">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto">
-                Download Desktop app
+            <Link href="/how-it-works">
+              <Button size="lg" variant="outline" className="w-full rounded-[10px] border-white/40 bg-white/5 px-5 font-semibold text-white hover:bg-white/10 min-[700px]:w-auto">
+                See how it works
               </Button>
             </Link>
           </div>

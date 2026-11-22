@@ -9,6 +9,10 @@ import { getSessionFromCookie } from '@/services/platform/auth';
 export const metadata = {
   title: 'Your VEYRA account',
   description: 'Manage your VEYRA account, devices, usage, and billing.',
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {

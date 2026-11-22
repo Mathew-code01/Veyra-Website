@@ -79,7 +79,7 @@ Families: Button, Badge, Input, Switch, Checkbox, Tab, NavItem, OverlayControl, 
 ## Icons and assets
 
 - The package embeds 46 Lucide-style SVG path icons in `dev/src/00_core.js`; use the corresponding existing Lucide library in the production app, not emoji. Names/paths are extracted from the `ICONS` object in that file.
-- SVG assets: `plugin/assets/veyra-app-icon.svg`, `veyra-mono.svg`, `veyra-symbol.svg`. The design system says the marks are proposed, not approved. Do not silently replace the existing production brand with them.
+- SVG assets: `plugin/assets/veyra-app-icon.svg`, `veyra-mono.svg`, `veyra-symbol.svg`. The design system says the marks are proposed, not approved. The user explicitly selected the proposed symbol and app icon for the current Website/Desktop branding changes; do not present that choice as final corporate identity approval.
 
 ## Responsive and prototype references
 

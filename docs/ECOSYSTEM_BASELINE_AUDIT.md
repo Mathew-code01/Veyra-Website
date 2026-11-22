@@ -29,7 +29,7 @@ Existing Desktop and Platform changes were treated as user work and not overwrit
 | Platform AI and payments | AI gateway and mock provider paths exist. Paystack adapter code includes signature verification, while mock provider accepts test signatures; selected runtime provider/config was not read. | Provider capability exists; production configuration is unverified. |
 | Platform contract/SDK use | Platform has `packages/contracts` and `packages/sdk`; neither Website nor Desktop package declares the SDK. Website maintains duplicate response shapes. | Implemented in Platform, not consumed by either client. |
 | Desktop application | Electron 39, Vite 8, React 19, TypeScript 6, SQLite/Drizzle, Transformers.js, ONNX Runtime, local voice/model dependencies. `core/` contains interview, prompts, vision, documents, preparation, local and cloud provider systems. | Product architecture present; feature-by-feature runtime verification remains. |
-| Desktop Platform integration | No Platform SDK/package dependency or Platform API calls were found in the Electron main/preload/UI paths inspected. A separate Express control-plane module defines account, device, billing, and AI routes but is referenced by tests/helpers rather than by the Electron lifecycle. | Missing from the actual Desktop client; duplicate server scaffolding exists but is not connected. |
+| Desktop Platform integration | `desktop/ipc/platform.ipc.ts` implements a main-process Platform client for browser/email-password sign-in, secure session storage, refresh, device registration, account/entitlement refresh, profile update and Website handoff. It is exposed only through typed preload IPC. | Implemented in source and security-bounded; live authorization, revocation propagation and network failure behavior remain unverified end to end. |
 | Local AI | Desktop package includes local inference/runtime dependencies and provider/model services. | Implemented in source; hardware readiness and actual inference not verified. |
 | Desktop development port | `vite.config.ts` sets host `127.0.0.1`, port 5173, `strictPort: true`. Website also starts on 5173. | Confirmed startup conflict when both clients are started together. |
 | Releases | Platform release/download route families exist; Website download UI checks availability. Actual signed/published installers and integrity verification through Desktop updater were not verified. | Requires external release assets and end-to-end verification. |
@@ -52,8 +52,8 @@ Existing Desktop and Platform changes were treated as user work and not overwrit
 ## Immediate confirmed blockers
 
 1. Desktop dev server and Website both claim port 5173; Desktop uses `strictPort`, so both cannot start together.
-2. Desktop does not use the shared Platform client, despite having a separate, test-only Express control-plane implementation.
-3. Website and Desktop do not consume the Platform SDK/contracts package.
+2. Desktop uses its own main-process typed Platform client rather than the Platform workspace SDK. This is acceptable if it remains a transport adapter, but response contracts should be reconciled with Platform packages to prevent drift.
+3. Website maintains a custom typed Platform client and does not consume the Platform workspace SDK directly.
 4. Website password recovery sends through Platform, while password update uses Supabase directly; its Supabase client disables URL session detection. The full recovery callback cannot be considered working.
 5. Platform's current local startup issue remains undiagnosed until a safe startup/readiness check can be run.
 6. Website checkout/payment state, remote plan seeding, OAuth provider state, email delivery, installer publication, and storage configuration require environment/provider verification.

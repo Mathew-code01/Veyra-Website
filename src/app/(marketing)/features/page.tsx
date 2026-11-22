@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
-import { Mic, Watch, GraduationCap, Shield, Monitor, CheckCircle } from 'lucide-react';
+import { ArrowRight, Mic, Watch, GraduationCap, Shield, Monitor, CheckCircle } from 'lucide-react';
 
 export const metadata = {
   title: 'Features',
@@ -11,6 +11,7 @@ export const metadata = {
 
 const capabilityCards = [
   {
+    id: 'live-copilot',
     icon: Mic,
     title: 'Live interview assistance',
     description:
@@ -19,6 +20,7 @@ const capabilityCards = [
       'VEYRA Desktop can use supported microphone or screen context after you enable the relevant permission. Guidance is shown in its desktop workspace; visibility depends on your window and screen-sharing setup.',
   },
   {
+    id: 'practice-studio',
     icon: Watch,
     title: 'Interview practice',
     description:
@@ -27,6 +29,7 @@ const capabilityCards = [
       'Practise role-specific questions, receive AI feedback on clarity and structure, and track your progress over time. Available through the VEYRA Desktop application.',
   },
   {
+    id: 'candidate-context',
     icon: GraduationCap,
     title: 'Personalised to you',
     description:
@@ -35,6 +38,7 @@ const capabilityCards = [
       'You control what context is authorised. VEYRA adapts its guidance to your background rather than offering generic advice.',
   },
   {
+    id: 'privacy-controls',
     icon: Shield,
     title: 'Privacy-first design',
     description:
@@ -43,6 +47,7 @@ const capabilityCards = [
       'Backup is opt-in with explicit consent and user-controlled retention. You can delete your account and export your data at any time.',
   },
   {
+    id: 'account-devices',
     icon: Monitor,
     title: 'Account and device management',
     description:
@@ -51,6 +56,7 @@ const capabilityCards = [
       'The Veyra Platform is the source of truth for identity, entitlements, subscriptions, payments, credits, and devices.',
   },
   {
+    id: 'practice-history',
     icon: CheckCircle,
     title: 'Practice history and feedback',
     description:
@@ -80,7 +86,8 @@ export default function FeaturesPage() {
               {capabilityCards.map((card) => (
                 <article
                   key={card.title}
-                  className="rounded-xl border border-border bg-card p-8 hover:shadow-lg transition-shadow"
+                  id={card.id}
+                  className="scroll-mt-24 rounded-xl border border-border bg-card p-8 transition-shadow hover:shadow-lg"
                 >
                   <div className="rounded-xl bg-veyra-indigo/10 p-4 mb-6 inline-flex">
                     <card.icon className="h-6 w-6 text-veyra-indigo" />
@@ -91,16 +98,25 @@ export default function FeaturesPage() {
                     <summary className="font-medium text-veyra-indigo cursor-pointer hover:underline">Learn more</summary>
                     <p className="mt-2">{card.detail}</p>
                   </details>
+                  {card.id === 'live-copilot' && (
+                    <Link
+                      href="/live-copilot"
+                      className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-veyra-indigo transition-colors hover:text-veyra-violet focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    >
+                      Explore Live Copilot <ArrowRight aria-hidden="true" className="h-4 w-4" />
+                    </Link>
+                  )}
                 </article>
               ))}
             </div>
           </div>
         </section>
 
-        <section className="py-20 bg-secondary/50">
+        <section id="use-cases" className="scroll-mt-24 bg-secondary/50 py-20">
           <div className="max-w-3xl mx-auto px-4 lg:px-8">
             <div className="rounded-2xl border border-border bg-card p-10 lg:p-16">
-              <h2 className="text-3xl font-bold text-veyra-navy mb-6">Live assistance vs practice</h2>
+              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-veyra-indigo">Use cases</p>
+              <h2 className="mb-6 text-3xl font-bold text-veyra-navy">Live assistance and practice, for different moments</h2>
               <div className="grid md:grid-cols-2 gap-8">
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-veyra-navy">Live interview assistance</h3>
@@ -111,7 +127,7 @@ export default function FeaturesPage() {
                     <li className="flex items-start gap-2"><span className="mt-0.5 h-3 w-3 rounded bg-emerald-500/10 flex items-center justify-center text-emerald-600"><span className="h-2 w-2 text-emerald-500">✓</span></span>Requires VEYRA Desktop app</li>
                   </ul>
                 </div>
-                <div className="space-y-4 border-l border-border pl-8">
+                <div className="space-y-4 border-t border-border pt-8 md:border-l md:border-t-0 md:pl-8 md:pt-0">
                   <h3 className="text-lg font-semibold text-veyra-navy">Interview practice</h3>
                   <ul className="space-y-3 text-sm text-muted-foreground">
                     <li className="flex items-start gap-2"><span className="mt-0.5 h-3 w-3 rounded bg-emerald-500/10 flex items-center justify-center text-emerald-600"><span className="h-2 w-2 text-emerald-500">✓</span></span>Simulated interview sessions</li>
@@ -121,12 +137,15 @@ export default function FeaturesPage() {
                   </ul>
                 </div>
               </div>
-              <div className="mt-8 flex gap-4">
+              <div className="mt-8 flex flex-wrap gap-3">
                 <Link href="/download">
                   <Button>Download Desktop app</Button>
                 </Link>
                 <Link href="/how-it-works">
                   <Button variant="outline">How it works</Button>
+                </Link>
+                <Link href="/ai-configuration">
+                  <Button variant="outline">AI and model options</Button>
                 </Link>
               </div>
             </div>
