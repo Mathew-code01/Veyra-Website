@@ -8,7 +8,7 @@ export function AuthLayout({ children }: { children: ReactNode }) {
       <section className="flex min-h-screen items-center justify-center px-4 py-8 sm:px-8 lg:px-12 bg-[#f7f8fc]">
         {children}
       </section>
-      <aside className="relative hidden overflow-hidden border-l border-[#e4e7f0] bg-gradient-to-br from-[#f5f2ff] via-[#f7f8fc] to-[#edeaff]/50 p-10 lg:flex lg:items-center lg:justify-center xl:p-14">
+      <aside className="relative hidden overflow-hidden border-l border-[#e4e7f0] bg-[#f7f8fc] p-10 lg:flex lg:items-center lg:justify-center xl:p-14">
         <div aria-hidden="true" className="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-[#d6cbff]/30 blur-3xl pointer-events-none" />
         <div aria-hidden="true" className="absolute -bottom-20 -left-20 h-72 w-72 rounded-full bg-[#eae4ff]/50 blur-3xl pointer-events-none" />
         <div className="relative w-full max-w-xl">
