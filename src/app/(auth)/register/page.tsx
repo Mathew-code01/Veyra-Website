@@ -17,6 +17,7 @@ const RegisterSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
   confirmPassword: z.string().min(1, 'Please confirm your password'),
+  csrfToken: z.string().min(1, 'Security token is required'),
 }).refine((data) => data.password === data.confirmPassword, {
   message: 'Passwords do not match',
   path: ['confirmPassword'],
@@ -31,11 +32,26 @@ export default function RegisterPage() {
   const [errorCode, setErrorCode] = useState<string | null>(null);
   const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [csrfToken, setCsrfToken] = useState<string>('');
 
   const form = useForm<z.infer<typeof RegisterSchema>>({
     resolver: zodResolver(RegisterSchema),
-    defaultValues: { email: '', password: '', confirmPassword: '' },
+    defaultValues: { email: '', password: '', confirmPassword: '', csrfToken: '' },
   });
+
+  useEffect(() => {
+    fetch('/api/csrf-token')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.token) {
+          setCsrfToken(data.token);
+          form.setValue('csrfToken', data.token);
+        }
+      })
+      .catch(() => {
+        // CSRF token fetch failed silently
+      });
+  }, [form]);
 
   const onSubmit = async (data: z.infer<typeof RegisterSchema>) => {
     setError(null);
@@ -45,6 +61,7 @@ export default function RegisterPage() {
     fd.append('email', data.email);
     fd.append('password', data.password);
     fd.append('redirectTo', redirectTo);
+    fd.append('csrfToken', data.csrfToken);
     const result = await registerAction(fd);
     if (result?.error) {
       setError(result.error);
@@ -117,6 +134,7 @@ export default function RegisterPage() {
         )}
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+          <input type="hidden" name="csrfToken" value={csrfToken} />
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium">
               Email address

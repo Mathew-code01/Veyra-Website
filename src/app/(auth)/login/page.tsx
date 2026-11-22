@@ -16,15 +16,17 @@ import { OAuthButtons } from '@/components/auth/OAuthButtons';
 const LoginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(1, 'Password is required'),
+  csrfToken: z.string().min(1, 'Security token is required'),
 });
 
 export default function LoginPage() {
   const [redirectTo, setRedirectTo] = useState('/dashboard');
   const [error, setError] = useState<string | null>(null);
+  const [csrfToken, setCsrfToken] = useState<string>('');
 
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
-    defaultValues: { email: '', password: '' },
+    defaultValues: { email: '', password: '', csrfToken: '' },
   });
 
   useEffect(() => {
@@ -34,6 +36,18 @@ export default function LoginPage() {
     if (emailParam) {
       form.setValue('email', emailParam);
     }
+    // Fetch CSRF token
+    fetch('/api/csrf-token')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.token) {
+          setCsrfToken(data.token);
+          form.setValue('csrfToken', data.token);
+        }
+      })
+      .catch(() => {
+        // CSRF token fetch failed silently
+      });
   }, [form]);
 
   const onSubmit = async (data: z.infer<typeof LoginSchema>) => {
@@ -42,6 +56,7 @@ export default function LoginPage() {
     fd.append('email', data.email);
     fd.append('password', data.password);
     fd.append('redirectTo', redirectTo);
+    fd.append('csrfToken', data.csrfToken);
     const result = await loginAction(fd);
     if (result?.error) {
       setError(result.error);
@@ -85,6 +100,7 @@ export default function LoginPage() {
         )}
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+          <input type="hidden" name="csrfToken" value={csrfToken} />
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium">
               Email address

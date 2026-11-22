@@ -7,6 +7,7 @@ import { apiBaseUrl } from '@/lib/env';
 import { clearOAuthStateCookie, clearTokenCookies, writeOAuthStateCookie, writeOAuthRedirectCookie, writeTokenCookies } from '@/services/platform/auth';
 import { isTrustedRedirect } from '@/lib/security/redirects';
 import { userFriendlyMessage, normalizeError } from '@/services/platform/errors';
+import { consumeCsrfToken } from '@/lib/security/csrf';
 
 function getClient() {
   return new VeyraPlatformClient({
@@ -16,6 +17,11 @@ function getClient() {
 }
 
 export async function loginAction(formData: FormData) {
+  const csrfToken = formData.get('csrfToken') as string | null;
+  if (!(await consumeCsrfToken(csrfToken))) {
+    return { error: 'Invalid or expired security token. Please refresh the page and try again.' };
+  }
+
   const email = (formData.get('email') as string)?.trim();
   const password = formData.get('password') as string;
   const redirectTo = formData.get('redirectTo') as string | null;
@@ -40,6 +46,11 @@ export async function loginAction(formData: FormData) {
 }
 
 export async function registerAction(formData: FormData) {
+  const csrfToken = formData.get('csrfToken') as string | null;
+  if (!(await consumeCsrfToken(csrfToken))) {
+    return { error: 'Invalid or expired security token. Please refresh the page and try again.' };
+  }
+
   const email = (formData.get('email') as string)?.trim();
   const password = formData.get('password') as string;
   const redirectTo = formData.get('redirectTo') as string | null;
@@ -85,6 +96,11 @@ export async function registerAction(formData: FormData) {
 }
 
 export async function logoutAction() {
+  const csrfToken = (await cookies()).get('veyra_csrf_token')?.value;
+  if (!(await consumeCsrfToken(csrfToken))) {
+    return { error: 'Invalid or expired security token. Please refresh the page and try again.' };
+  }
+
   const cookieStore = await cookies();
   const token = cookieStore.get('veyra_access_token')?.value;
 
@@ -130,6 +146,11 @@ export async function refreshSessionAction() {
 }
 
 export async function passwordRecoveryAction(formData: FormData) {
+  const csrfToken = formData.get('csrfToken') as string | null;
+  if (!(await consumeCsrfToken(csrfToken))) {
+    return { success: true, message: 'If an account exists, a recovery link has been sent.' };
+  }
+
   const email = formData.get('email') as string;
   const client = getClient();
   try {
@@ -142,6 +163,11 @@ export async function passwordRecoveryAction(formData: FormData) {
 }
 
 export async function oauthStartAction(formData: FormData) {
+  const csrfToken = formData.get('csrfToken') as string | null;
+  if (!(await consumeCsrfToken(csrfToken))) {
+    return { error: 'Invalid or expired security token. Please refresh the page and try again.' };
+  }
+
   const providerValue = formData.get('provider');
   if (providerValue !== 'google' && providerValue !== 'github') {
     return { error: 'Choose a supported sign-in provider.' };
